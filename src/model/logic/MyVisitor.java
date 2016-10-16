@@ -1,6 +1,5 @@
 package model.logic;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,7 +99,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     public T visitBloqueEscribir(pseintGrammarParser.BloqueEscribirContext ctx) {
         if (ctx.exprLista() != null) {
             StringBuilder out = new StringBuilder();
-            ((List<Object>) ctx.exprLista()).stream().forEach((expression) -> {
+            ((List<Object>) visitExprLista(ctx.exprLista())).stream().forEach((expression) -> {
                 out.append(expression.toString());
                 out.append('\n');
             });
@@ -182,10 +181,11 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         }
         return super.visitBloqueDeclaracion(ctx);
     }
-    
+
+
+    // Pendiente implementar
     @Override
     public T visitBloqueSegun(pseintGrammarParser.BloqueSegunContext ctx) {
-        
         return super.visitBloqueSegun(ctx);
     }
     
