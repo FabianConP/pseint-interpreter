@@ -1,4 +1,4 @@
-// Generated from pseintGrammar.g by ANTLR 4.5.1
+// Generated from pseintGrammar.g4 by ANTLR 4.5.1
 package model.generated;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -28,49 +28,49 @@ public class pseintGrammarBaseListener implements pseintGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterProcedure(pseintGrammarParser.ProcedureContext ctx) { }
+	@Override public void enterProcedimiento(pseintGrammarParser.ProcedimientoContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitProcedure(pseintGrammarParser.ProcedureContext ctx) { }
+	@Override public void exitProcedimiento(pseintGrammarParser.ProcedimientoContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterMain(pseintGrammarParser.MainContext ctx) { }
+	@Override public void enterPrincipal(pseintGrammarParser.PrincipalContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitMain(pseintGrammarParser.MainContext ctx) { }
+	@Override public void exitPrincipal(pseintGrammarParser.PrincipalContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCommands(pseintGrammarParser.CommandsContext ctx) { }
+	@Override public void enterComandos(pseintGrammarParser.ComandosContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCommands(pseintGrammarParser.CommandsContext ctx) { }
+	@Override public void exitComandos(pseintGrammarParser.ComandosContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterCommand(pseintGrammarParser.CommandContext ctx) { }
+	@Override public void enterComando(pseintGrammarParser.ComandoContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitCommand(pseintGrammarParser.CommandContext ctx) { }
+	@Override public void exitComando(pseintGrammarParser.ComandoContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -232,25 +232,61 @@ public class pseintGrammarBaseListener implements pseintGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterBooleanExpr(pseintGrammarParser.BooleanExprContext ctx) { }
+	@Override public void enterOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitBooleanExpr(pseintGrammarParser.BooleanExprContext ctx) { }
+	@Override public void exitOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterComparisonExpr(pseintGrammarParser.ComparisonExprContext ctx) { }
+	@Override public void enterValor(pseintGrammarParser.ValorContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitComparisonExpr(pseintGrammarParser.ComparisonExprContext ctx) { }
+	@Override public void exitValor(pseintGrammarParser.ValorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterExprLista(pseintGrammarParser.ExprListaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitExprLista(pseintGrammarParser.ExprListaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIdLista(pseintGrammarParser.IdListaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIdLista(pseintGrammarParser.IdListaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterVarArreglo(pseintGrammarParser.VarArregloContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitVarArreglo(pseintGrammarParser.VarArregloContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

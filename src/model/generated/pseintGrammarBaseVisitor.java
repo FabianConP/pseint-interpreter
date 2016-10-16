@@ -1,4 +1,4 @@
-// Generated from pseintGrammar.g by ANTLR 4.5.1
+// Generated from pseintGrammar.g4 by ANTLR 4.5.1
 package model.generated;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
@@ -24,28 +24,28 @@ public class pseintGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> imp
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitProcedure(pseintGrammarParser.ProcedureContext ctx) { return visitChildren(ctx); }
+	@Override public T visitProcedimiento(pseintGrammarParser.ProcedimientoContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitMain(pseintGrammarParser.MainContext ctx) { return visitChildren(ctx); }
+	@Override public T visitPrincipal(pseintGrammarParser.PrincipalContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCommands(pseintGrammarParser.CommandsContext ctx) { return visitChildren(ctx); }
+	@Override public T visitComandos(pseintGrammarParser.ComandosContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCommand(pseintGrammarParser.CommandContext ctx) { return visitChildren(ctx); }
+	@Override public T visitComando(pseintGrammarParser.ComandoContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -143,14 +143,35 @@ public class pseintGrammarBaseVisitor<T> extends AbstractParseTreeVisitor<T> imp
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitBooleanExpr(pseintGrammarParser.BooleanExprContext ctx) { return visitChildren(ctx); }
+	@Override public T visitOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitComparisonExpr(pseintGrammarParser.ComparisonExprContext ctx) { return visitChildren(ctx); }
+	@Override public T visitValor(pseintGrammarParser.ValorContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitExprLista(pseintGrammarParser.ExprListaContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitIdLista(pseintGrammarParser.IdListaContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitVarArreglo(pseintGrammarParser.VarArregloContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

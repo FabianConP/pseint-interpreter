@@ -1,4 +1,4 @@
-// Generated from pseintGrammar.g by ANTLR 4.5.1
+// Generated from pseintGrammar.g4 by ANTLR 4.5.1
 package model.generated;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -17,29 +17,29 @@ public interface pseintGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPseint(pseintGrammarParser.PseintContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link pseintGrammarParser#procedure}.
+	 * Visit a parse tree produced by {@link pseintGrammarParser#procedimiento}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitProcedure(pseintGrammarParser.ProcedureContext ctx);
+	T visitProcedimiento(pseintGrammarParser.ProcedimientoContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link pseintGrammarParser#main}.
+	 * Visit a parse tree produced by {@link pseintGrammarParser#principal}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitMain(pseintGrammarParser.MainContext ctx);
+	T visitPrincipal(pseintGrammarParser.PrincipalContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link pseintGrammarParser#commands}.
+	 * Visit a parse tree produced by {@link pseintGrammarParser#comandos}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCommands(pseintGrammarParser.CommandsContext ctx);
+	T visitComandos(pseintGrammarParser.ComandosContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link pseintGrammarParser#command}.
+	 * Visit a parse tree produced by {@link pseintGrammarParser#comando}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitCommand(pseintGrammarParser.CommandContext ctx);
+	T visitComando(pseintGrammarParser.ComandoContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link pseintGrammarParser#bloqueSi}.
 	 * @param ctx the parse tree
@@ -119,17 +119,35 @@ public interface pseintGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExpr(pseintGrammarParser.ExprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link pseintGrammarParser#booleanExpr}.
+	 * Visit a parse tree produced by {@link pseintGrammarParser#operatorUnary}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBooleanExpr(pseintGrammarParser.BooleanExprContext ctx);
+	T visitOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link pseintGrammarParser#comparisonExpr}.
+	 * Visit a parse tree produced by {@link pseintGrammarParser#valor}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitComparisonExpr(pseintGrammarParser.ComparisonExprContext ctx);
+	T visitValor(pseintGrammarParser.ValorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link pseintGrammarParser#exprLista}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprLista(pseintGrammarParser.ExprListaContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link pseintGrammarParser#idLista}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdLista(pseintGrammarParser.IdListaContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link pseintGrammarParser#varArreglo}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVarArreglo(pseintGrammarParser.VarArregloContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link pseintGrammarParser#tipoDato}.
 	 * @param ctx the parse tree

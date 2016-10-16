@@ -1,4 +1,4 @@
-// Generated from pseintGrammar.g by ANTLR 4.5.1
+// Generated from pseintGrammar.g4 by ANTLR 4.5.1
 package model.generated;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -18,45 +18,45 @@ public interface pseintGrammarListener extends ParseTreeListener {
 	 */
 	void exitPseint(pseintGrammarParser.PseintContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link pseintGrammarParser#procedure}.
+	 * Enter a parse tree produced by {@link pseintGrammarParser#procedimiento}.
 	 * @param ctx the parse tree
 	 */
-	void enterProcedure(pseintGrammarParser.ProcedureContext ctx);
+	void enterProcedimiento(pseintGrammarParser.ProcedimientoContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link pseintGrammarParser#procedure}.
+	 * Exit a parse tree produced by {@link pseintGrammarParser#procedimiento}.
 	 * @param ctx the parse tree
 	 */
-	void exitProcedure(pseintGrammarParser.ProcedureContext ctx);
+	void exitProcedimiento(pseintGrammarParser.ProcedimientoContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link pseintGrammarParser#main}.
+	 * Enter a parse tree produced by {@link pseintGrammarParser#principal}.
 	 * @param ctx the parse tree
 	 */
-	void enterMain(pseintGrammarParser.MainContext ctx);
+	void enterPrincipal(pseintGrammarParser.PrincipalContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link pseintGrammarParser#main}.
+	 * Exit a parse tree produced by {@link pseintGrammarParser#principal}.
 	 * @param ctx the parse tree
 	 */
-	void exitMain(pseintGrammarParser.MainContext ctx);
+	void exitPrincipal(pseintGrammarParser.PrincipalContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link pseintGrammarParser#commands}.
+	 * Enter a parse tree produced by {@link pseintGrammarParser#comandos}.
 	 * @param ctx the parse tree
 	 */
-	void enterCommands(pseintGrammarParser.CommandsContext ctx);
+	void enterComandos(pseintGrammarParser.ComandosContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link pseintGrammarParser#commands}.
+	 * Exit a parse tree produced by {@link pseintGrammarParser#comandos}.
 	 * @param ctx the parse tree
 	 */
-	void exitCommands(pseintGrammarParser.CommandsContext ctx);
+	void exitComandos(pseintGrammarParser.ComandosContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link pseintGrammarParser#command}.
+	 * Enter a parse tree produced by {@link pseintGrammarParser#comando}.
 	 * @param ctx the parse tree
 	 */
-	void enterCommand(pseintGrammarParser.CommandContext ctx);
+	void enterComando(pseintGrammarParser.ComandoContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link pseintGrammarParser#command}.
+	 * Exit a parse tree produced by {@link pseintGrammarParser#comando}.
 	 * @param ctx the parse tree
 	 */
-	void exitCommand(pseintGrammarParser.CommandContext ctx);
+	void exitComando(pseintGrammarParser.ComandoContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link pseintGrammarParser#bloqueSi}.
 	 * @param ctx the parse tree
@@ -188,25 +188,55 @@ public interface pseintGrammarListener extends ParseTreeListener {
 	 */
 	void exitExpr(pseintGrammarParser.ExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link pseintGrammarParser#booleanExpr}.
+	 * Enter a parse tree produced by {@link pseintGrammarParser#operatorUnary}.
 	 * @param ctx the parse tree
 	 */
-	void enterBooleanExpr(pseintGrammarParser.BooleanExprContext ctx);
+	void enterOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link pseintGrammarParser#booleanExpr}.
+	 * Exit a parse tree produced by {@link pseintGrammarParser#operatorUnary}.
 	 * @param ctx the parse tree
 	 */
-	void exitBooleanExpr(pseintGrammarParser.BooleanExprContext ctx);
+	void exitOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link pseintGrammarParser#comparisonExpr}.
+	 * Enter a parse tree produced by {@link pseintGrammarParser#valor}.
 	 * @param ctx the parse tree
 	 */
-	void enterComparisonExpr(pseintGrammarParser.ComparisonExprContext ctx);
+	void enterValor(pseintGrammarParser.ValorContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link pseintGrammarParser#comparisonExpr}.
+	 * Exit a parse tree produced by {@link pseintGrammarParser#valor}.
 	 * @param ctx the parse tree
 	 */
-	void exitComparisonExpr(pseintGrammarParser.ComparisonExprContext ctx);
+	void exitValor(pseintGrammarParser.ValorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link pseintGrammarParser#exprLista}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprLista(pseintGrammarParser.ExprListaContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link pseintGrammarParser#exprLista}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprLista(pseintGrammarParser.ExprListaContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link pseintGrammarParser#idLista}.
+	 * @param ctx the parse tree
+	 */
+	void enterIdLista(pseintGrammarParser.IdListaContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link pseintGrammarParser#idLista}.
+	 * @param ctx the parse tree
+	 */
+	void exitIdLista(pseintGrammarParser.IdListaContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link pseintGrammarParser#varArreglo}.
+	 * @param ctx the parse tree
+	 */
+	void enterVarArreglo(pseintGrammarParser.VarArregloContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link pseintGrammarParser#varArreglo}.
+	 * @param ctx the parse tree
+	 */
+	void exitVarArreglo(pseintGrammarParser.VarArregloContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link pseintGrammarParser#tipoDato}.
 	 * @param ctx the parse tree

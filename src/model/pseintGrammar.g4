@@ -26,13 +26,13 @@ comando 	        : bloqueSi
                         ;
 			        
 bloqueSi                : SI expr ENTONCES comandos (SINO comandos)? FINSI ;
-bloquePara              : PARA ID ASIGOP expr HASTA expr (CON PASO expr)? HACER comandos FINPARA ;
+bloquePara              : PARA ID (CORIZQ exprLista  CORDER)? ASIGOP expr HASTA expr (CON PASO expr)? HACER comandos FINPARA ;
 bloqueMientras          : MIENTRAS expr HACER comandos FINMIENTRAS ;
 bloqueRepetir           : REPETIR comandos HASTA QUE expr ;
 bloqueSegun             : SEGUN expr HACER (CASO expr DOSP comandos)* (DE OTRO MODO DOSP comandos)? FINSEGUN ;
 bloqueDeclaracion       : DEFINIR idLista COMO  tipoDato PYC ;
 bloqueAsignacion	: ID (CORIZQ exprLista  CORDER)? ASIGOP expr PYC ;
-bloqueDimension         : DIMENSION ID CORIZQ exprLista CORDER (COMA ID (CORIZQ exprLista CORDER)+)* PYC ;
+bloqueDimension         : DIMENSION varArreglo (COMA varArreglo)* PYC ;
 
 bloqueBorrarPantalla    : BORRAR PANTALLA PYC
                         | LIMPIAR PANTALLA PYC 
@@ -68,6 +68,8 @@ valor                   : INT
 exprLista               : expr (COMA expr)* ;
 idLista                 : ID (COMA ID)* ;
 
+varArreglo              : ID CORIZQ exprLista CORDER;
+
 
 tipoDato		: tipoDatoEntero
                         | tipoDatoReal
@@ -93,7 +95,7 @@ ASIGOP                  : '<-';
 COMPOP                  : ('=' | '<>' | '<' | '<=' | '>' | '>=');
 BINOP                   : (O | '|' | Y | '&');
 MULOP                   : ('/' | '*' | '%' | MOD | '^');
-SUMOP                   : ('+' | '-');
+SUMOP                   : ('+' | '-') { _input.LA(1) != ' ' }?;
 
 PYC                     : ';';
 DOSP                    : ':';
