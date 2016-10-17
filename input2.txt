@@ -1,22 +1,55 @@
 proceso main
-    definir a, b como entero;
-    a <- -8;
-    b <- 6;
-    /*escribir "Suma ", a + b;
-    escribir "Resta ", a - b;*/
+    /*definir a como real;
+    definir b como numerico;
+    a <- 2*3.0 + 1;
+    escribir a;
+    //a <- -8;
+    b <- 1 + 6*2 + 2;
+    escribir "Suma ", a + b;
+    escribir "Resta ", a - b;
     escribir "Mult ", a * b;
     escribir "Division ", a / b;
     escribir "Potencia ", a ^ b;
     escribir "Negacion ", -a;
     
-    si a < b entonces
-        definir c como cadena;
-        c <- "Soy menor";
-        escribir c;
-    sino
-        definir c como cadena;
-        c <- "Soy mayor";
-        escribir c;    
-    finsi
+    definir condicion como logico;
+    condicion <- verdadero;
+    repetir
+        escribir b;
+        b <- b * 2;
+        condicion <- b < 1000;
+    hasta que ~condicion
+    
+    escribir "Duermo 5 milisegundos";
+    esperar 5 milisegundos;
+    escribir "Dormi 5 milisegundos";
+    esperar tecla; // Not is working :( 
 
+    definir base, altura como real;
+    escribir "Digite la base";
+    leer base;
+    escribir "Digite la altura";
+    leer altura;
+    escribir "El area de un rectangulo es", base * altura;
+    borrar pantalla;
+    
+    definir animal como cadena;
+    leer animal;
+    segun animal hacer
+        caso "perro":
+            escribir "uau";
+        caso "gato":
+            escribir "miau";
+        de otro modo:
+            escribir "se murio";
+    finsegun*/
+    escribir "Digite la tabla de multiplicar que desea";
+    definir tabla como entero;
+    leer tabla;
+    definir cont, limite como entero;
+    limite <- 10;
+    para cont <- 1 hasta limite con paso 0.2 hacer
+        escribir cont + tabla;
+    finpara
+    
 finalgoritmo

@@ -218,6 +218,16 @@ public interface pseintGrammarListener extends ParseTreeListener {
 	 */
 	void exitIdLista(pseintGrammarParser.IdListaContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link pseintGrammarParser#casoLista}.
+	 * @param ctx the parse tree
+	 */
+	void enterCasoLista(pseintGrammarParser.CasoListaContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link pseintGrammarParser#casoLista}.
+	 * @param ctx the parse tree
+	 */
+	void exitCasoLista(pseintGrammarParser.CasoListaContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link pseintGrammarParser#varArreglo}.
 	 * @param ctx the parse tree
 	 */

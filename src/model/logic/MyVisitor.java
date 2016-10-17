@@ -3,6 +3,7 @@ package model.logic;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
 import model.generated.pseintGrammarBaseVisitor;
@@ -10,13 +11,15 @@ import model.generated.pseintGrammarParser;
 
 public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
 
-    private Stack<HashMap<String, Object>> contextVariables;
+    private Stack<Map<String, Object>> contextVariables;
+    private Stack<List<String>> contextVariablesNames;
     private final Scanner in;
 
     private final double EPS = 1e-9;
 
     public MyVisitor() {
         contextVariables = new Stack<>();
+        contextVariablesNames = new Stack<>();
         contextVariables.push(new HashMap<>());
         in = new Scanner(System.in);
     }
@@ -140,7 +143,9 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
 
     @Override
     public T visitBloqueEsperar(pseintGrammarParser.BloqueEsperarContext ctx) {
-        if (ctx.expr() != null) {
+        if (ctx.TECLA() != null) {
+            in.nextLine();
+        } else if (ctx.expr() != null) {
             try {
                 int miliseconds = (Integer) visitExpr(ctx.expr());
                 if (ctx.SEGUNDOS() != null)
@@ -238,7 +243,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             Object var = getVarValue(id);
             Object value = visitExpr(ctx.expr());
             if (!Util.sameType(var, value))
-                return null;
+                Util.semanticError(0, 0, "declaracion de tipo diferente");
             setVarValue(id, value);
         }
         //return super.visitBloqueAsignacion(ctx);
@@ -263,38 +268,57 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     // Pendiente implementar
     @Override
     public T visitBloqueSegun(pseintGrammarParser.BloqueSegunContext ctx) {
-
+        if (ctx.expr() != null) {
+            createContext();
+            Object var = visitExpr(ctx.expr());
+            boolean entered = false;
+            if (ctx.casoLista() != null) {
+                int nCases = ctx.casoLista().CASO().size();
+                for (int i = 0; i < nCases; i++)
+                    if (var.equals(visitExpr(ctx.casoLista().expr(i)))) {
+                        visitComandos(ctx.casoLista().comandos(i));
+                        entered = true;
+                    }
+            }
+            if (ctx.DE() != null && ctx.OTRO() != null && ctx.MODO() != null && !entered)
+                visitComandos(ctx.comandos());
+            deleteContext();
+        }
         //return super.visitBloqueSegun(ctx);
         return null;
     }
 
     @Override
-    public T visitBloqueRepetir(pseintGrammarParser.BloqueRepetirContext ctx) {
+    public T visitBloqueRepetir(pseintGrammarParser.BloqueRepetirContext ctx
+    ) {
         if (ctx.expr() != null) {
             do {
                 createContext();
                 visitComandos(ctx.comandos());
                 deleteContext();
-            } while ((Boolean) visitExpr(ctx.expr()));
+            } while (!evalBooleanExpr(visitExpr(ctx.expr())));
         }
         //return super.visitBloqueRepetir(ctx);
         return null;
     }
 
     @Override
-    public T visitBloqueMientras(pseintGrammarParser.BloqueMientrasContext ctx) {
-        if (ctx.expr() != null){
-            createContext();
-            while ((Boolean) visitExpr(ctx.expr()))
+    public T visitBloqueMientras(pseintGrammarParser.BloqueMientrasContext ctx
+    ) {
+        if (ctx.expr() != null) {
+            while (evalBooleanExpr(visitExpr(ctx.expr()))) {
+                createContext();
                 visitComandos(ctx.comandos());
-            deleteContext();
+                deleteContext();
+            }
         }
 //        return super.visitBloqueMientras(ctx);
         return null;
     }
 
     @Override
-    public T visitBloquePara(pseintGrammarParser.BloqueParaContext ctx) {
+    public T visitBloquePara(pseintGrammarParser.BloqueParaContext ctx
+    ) {
         if (ctx.ID() != null) {
             String ID = ctx.ID().getText();
             if (!isVarDefined(ID))
@@ -303,18 +327,23 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             Object value = visitExpr(ctx.expr(0));
             if (!Util.sameType(var, value))
                 Util.semanticError(0, 0, "Incompatibilidad de tipos...");
-            if (!Integer.class.isInstance(value))
+            if (!Integer.class.isInstance(value) && !Double.class.isInstance(value))
                 Util.semanticError(0, 0, "Incompatibilidad de tipos...");
-            Integer limit = (Integer) visitExpr(ctx.expr(0));
-            Integer step = 1;
-            if (ctx.expr(1) != null)
-                if (!Integer.class.isInstance(ctx.expr(1)))
+            setVarValue(ID, value);
+            Double limit = (Double) Double.parseDouble(visitExpr(ctx.expr(1)).toString());
+            Double step = 1.0;
+            if (ctx.expr(2) != null){
+                Object valueStep = visitExpr(ctx.expr(2));
+                if (!Integer.class.isInstance(valueStep) && !Double.class.isInstance(valueStep))
                     Util.semanticError(0, 0, "Incompatibilidad de tipos...");
                 else
-                    step = (Integer) visitExpr(ctx.expr(1));
-            while ((Integer) getVarValue(ID) <= limit) {
+                    step = (Double) Double.parseDouble(valueStep.toString());
+            }
+            while (cmp(Double.parseDouble(getVarValue(ID).toString()), limit) <= 0) {
+                createContext();
                 visitComandos(ctx.comandos());
-                setVarValue(ID, ((Integer) getVarValue(ID)) + step);
+                setVarValue(ID, Double.parseDouble(getVarValue(ID).toString()) + step);
+                deleteContext();
             }
         }
 //        return super.visitBloquePara(ctx);
@@ -322,7 +351,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     }
 
     @Override
-    public T visitBloqueSi(pseintGrammarParser.BloqueSiContext ctx) {
+    public T visitBloqueSi(pseintGrammarParser.BloqueSiContext ctx
+    ) {
         if (ctx.expr() != null) {
             Boolean condition = (Boolean) visitExpr(ctx.expr());
             if (condition) {
@@ -340,7 +370,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     }
 
     @Override
-    public T visitPrincipal(pseintGrammarParser.PrincipalContext ctx) {
+    public T visitPrincipal(pseintGrammarParser.PrincipalContext ctx
+    ) {
         createContext();
         return super.visitPrincipal(ctx);
     }
@@ -349,7 +380,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
      * Pendiente agregar los valores de los parametros
      */
     @Override
-    public T visitProcedimiento(pseintGrammarParser.ProcedimientoContext ctx) {
+    public T visitProcedimiento(pseintGrammarParser.ProcedimientoContext ctx
+    ) {
         createContext();
         visitComandos(ctx.comandos());
         deleteContext();
@@ -357,7 +389,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     }
 
     @Override
-    public T visitPseint(pseintGrammarParser.PseintContext ctx) {
+    public T visitPseint(pseintGrammarParser.PseintContext ctx
+    ) {
         createContext();
         return super.visitPseint(ctx);
     }
@@ -375,16 +408,31 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     }
 
     private void createContext() {
+        List<String> varNames = new LinkedList<>();
+        contextVariables.peek().forEach((key, value) -> varNames.add(key));
         contextVariables.push(new HashMap<>(contextVariables.peek()));
+        contextVariablesNames.push(varNames);
+    }
+
+    private void createContextProcedure() {
+        contextVariables.push(new HashMap<>());
+        createContext();
     }
 
     private void deleteContext() {
+        Map<String, Object> curContext = contextVariables.peek();
         contextVariables.pop();
+        curContext.forEach((key, value) -> {
+            if (isVarDefined(key))
+                setVarValue(key, value);
+        });
+
     }
 
     private Object transformByType(String id, String value) {
         Object var = getVarValue(id);
         final String simpleName = var.getClass().getSimpleName();
+        boolean errorTransformation;
         switch (simpleName) {
             case "Integer":
                 return (Integer) Integer.parseInt(value);
@@ -416,6 +464,14 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         else
             Util.semanticError(0, 0, "Tipo de dato invalido");
         return (T) tipoDato;
+    }
+
+    public Boolean
+            evalBooleanExpr(Object expr) {
+        if (!Boolean.class
+                .isInstance(expr))
+            Util.semanticError(0, 0, "expresion booleana incorrecta");
+        return (Boolean) expr;
     }
 
     private Object mul(Object a, Object b, final String op) {
@@ -453,7 +509,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                     Util.semanticError(0, 0, "operador desconocido");
             }
             if (isInteger(res))
-                return (Integer) (int) res;
+                return (Integer) (int) Math.round(res);
             return (Double) res;
         }
         return null;
@@ -478,7 +534,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                     Util.semanticError(0, 0, "operador desconocido");
             }
             if (isInteger(res))
-                return (Integer) (int) res;
+                return (Integer) (int) Math.round(res);
             return (Double) res;
         }
         return null;
@@ -503,7 +559,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                     Util.semanticError(0, 0, "operador desconocido");
             }
             if (isInteger(res))
-                return (Integer) (int) res;
+                return (Integer) (int) Math.round(res);
             return (Double) res;
         }
         return null;
@@ -525,7 +581,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                     Util.semanticError(0, 0, "operador desconocido");
             }
             if (isInteger(res))
-                return (Integer) (int) res;
+                return (Integer) (int) Math.round(res);
             return (Double) res;
         }
         return null;
@@ -572,8 +628,6 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         boolean bIsDouble = b instanceof Double;
         boolean bIsString = b instanceof String;
 
-        double res = 0;
-
         if ((aIsInteger || aIsDouble) && (bIsInteger || bIsDouble)) {
             double numa = (Double) Double.parseDouble(a.toString()), numb = (Double) Double.parseDouble(b.toString());
             switch (op) {
@@ -592,9 +646,6 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 default:
                     Util.semanticError(0, 0, "operador desconocido");
             }
-            if (isInteger(res))
-                return (Integer) (int) res;
-            return (Double) res;
         }
         if (aIsString && bIsString) {
             String strA = (String) a, strB = (String) b;

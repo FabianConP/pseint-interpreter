@@ -268,6 +268,18 @@ public class pseintGrammarBaseListener implements pseintGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCasoLista(pseintGrammarParser.CasoListaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCasoLista(pseintGrammarParser.CasoListaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterVarArreglo(pseintGrammarParser.VarArregloContext ctx) { }
 	/**
 	 * {@inheritDoc}

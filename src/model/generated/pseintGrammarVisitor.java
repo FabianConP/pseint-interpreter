@@ -137,6 +137,12 @@ public interface pseintGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitIdLista(pseintGrammarParser.IdListaContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link pseintGrammarParser#casoLista}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCasoLista(pseintGrammarParser.CasoListaContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link pseintGrammarParser#varArreglo}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
