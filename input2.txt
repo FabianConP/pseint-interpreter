@@ -1,0 +1,22 @@
+proceso main
+    definir a, b como entero;
+    a <- -8;
+    b <- 6;
+    /*escribir "Suma ", a + b;
+    escribir "Resta ", a - b;*/
+    escribir "Mult ", a * b;
+    escribir "Division ", a / b;
+    escribir "Potencia ", a ^ b;
+    escribir "Negacion ", -a;
+    
+    si a < b entonces
+        definir c como cadena;
+        c <- "Soy menor";
+        escribir c;
+    sino
+        definir c como cadena;
+        c <- "Soy mayor";
+        escribir c;    
+    finsi
+
+finalgoritmo

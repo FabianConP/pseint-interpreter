@@ -3,21 +3,25 @@ package model.logic;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
 import model.generated.pseintGrammarBaseVisitor;
 import model.generated.pseintGrammarParser;
 
 public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
-    
+
     private Stack<HashMap<String, Object>> contextVariables;
-    final private Scanner in;
-    
+    private final Scanner in;
+
+    private final double EPS = 1e-9;
+
     public MyVisitor() {
         contextVariables = new Stack<>();
+        contextVariables.push(new HashMap<>());
         in = new Scanner(System.in);
     }
-    
+
     @Override
     public T visitIdLista(pseintGrammarParser.IdListaContext ctx) {
         List<String> ids = new LinkedList<>();
@@ -27,7 +31,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         return (T) ids;
 //        return super.visitIdLista(ctx); 
     }
-    
+
     @Override
     public T visitExprLista(pseintGrammarParser.ExprListaContext ctx) {
         List<Object> expressions = new LinkedList<>();
@@ -37,7 +41,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         return (T) expressions;
 //        return super.visitExprLista(ctx); 
     }
-    
+
     @Override
     public T visitValor(pseintGrammarParser.ValorContext ctx) {
         if (ctx.INT() != null) {
@@ -45,7 +49,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         } else if (ctx.DOUBLE() != null) {
             return (T) (Double) Double.parseDouble(ctx.DOUBLE().toString());
         } else if (ctx.STRING() != null) {
-            return (T) ctx.STRING().toString();
+            String value = ctx.STRING().toString();
+            return (T) value.substring(1, value.length() - 1);
         } else if (ctx.BOOL() != null) {
             final String value = ctx.BOOL().getText().toLowerCase();
             switch (value) {
@@ -60,12 +65,78 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         }
         return super.visitValor(ctx);
     }
-    
+
     @Override
     public T visitExpr(pseintGrammarParser.ExprContext ctx) {
+        if (ctx.valor() != null) {
+            return visitValor(ctx.valor());
+        } else if (ctx.MULOP() != null) {
+            final String op = ctx.MULOP().getText().toLowerCase();
+            Object a = visitExpr(ctx.expr(0));
+            Object b = visitExpr(ctx.expr(1));
+            Object result = mul(a, b, op);
+            if (result == null)
+                Util.semanticError(0, 0, "error en mult");
+            return (T) result;
+        } else if (ctx.SUMOP() != null) {
+            final String op = ctx.SUMOP().getText().toLowerCase();
+            Object a = visitExpr(ctx.expr(0));
+            Object b = visitExpr(ctx.expr(1));
+            Object result = sum(a, b, op);
+            if (result == null)
+                Util.semanticError(0, 0, "error en suma");
+            return (T) result;
+        } else if (ctx.RESOP() != null) {
+            if (ctx.expr(1) != null) {
+                final String op = ctx.RESOP().getText().toLowerCase();
+                Object a = visitExpr(ctx.expr(0));
+                Object b = visitExpr(ctx.expr(1));
+                Object result = sub(a, b, op);
+                if (result == null)
+                    Util.semanticError(0, 0, "error en resta");
+                return (T) result;
+            } else {
+                final String op = ctx.RESOP().getText().toLowerCase();
+                Object a = visitExpr(ctx.expr(0));
+                Object result = negArit(a, op);
+                if (result == null)
+                    Util.semanticError(0, 0, "error en negacion aritmetica");
+                return (T) result;
+            }
+        } else if (ctx.NEGOP() != null) {
+            final String op = ctx.NEGOP().getText().toLowerCase();
+            Object a = visitExpr(ctx.expr(0));
+            Object result = negBool(a, op);
+            if (result == null)
+                Util.semanticError(0, 0, "error en negacion booleana");
+            return (T) result;
+        } else if (ctx.BINOP() != null) {
+            final String op = ctx.BINOP().getText().toLowerCase();
+            Object a = visitExpr(ctx.expr(0));
+            Object b = visitExpr(ctx.expr(1));
+            Object result = binOp(a, b, op);
+            if (result == null)
+                Util.semanticError(0, 0, "error en operacion binaria");
+            return (T) result;
+        } else if (ctx.COMPOP() != null) {
+            final String op = ctx.COMPOP().getText().toLowerCase();
+            Object a = visitExpr(ctx.expr(0));
+            Object b = visitExpr(ctx.expr(1));
+            Object result = compOp(a, b, op);
+            if (result == null)
+                Util.semanticError(0, 0, "error en comparacion");
+            return (T) result;
+        } else if (ctx.PARIZQ() != null) {
+            return visitExpr(ctx.expr(0));
+        } else if (ctx.CORIZQ() != null) {
+
+        } else if (ctx.ID() != null) {
+            String ID = ctx.ID().getText();
+            return (T) getVarValue(ID);
+        }
         return super.visitExpr(ctx);
     }
-    
+
     @Override
     public T visitBloqueEsperar(pseintGrammarParser.BloqueEsperarContext ctx) {
         if (ctx.expr() != null) {
@@ -80,7 +151,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         }
         return super.visitBloqueEsperar(ctx);
     }
-    
+
     @Override
     public T visitBloqueLeer(pseintGrammarParser.BloqueLeerContext ctx) {
         if (ctx.idLista() != null) {
@@ -94,7 +165,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         }
         return super.visitBloqueLeer(ctx);
     }
-    
+
     @Override
     public T visitBloqueEscribir(pseintGrammarParser.BloqueEscribirContext ctx) {
         if (ctx.exprLista() != null) {
@@ -103,12 +174,12 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 out.append(expression.toString());
                 out.append('\n');
             });
-            System.out.println(out.toString());
+            System.out.print(out.toString());
         }
         return null;
 //        return super.visitBloqueEscribir(ctx);
     }
-    
+
     @Override
     public T visitBloqueBorrarPantalla(pseintGrammarParser.BloqueBorrarPantallaContext ctx) {
         try {
@@ -167,11 +238,11 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         }
         return super.visitBloqueAsignacion(ctx);
     }
-    
+
     @Override
     public T visitBloqueDeclaracion(pseintGrammarParser.BloqueDeclaracionContext ctx) {
         if (ctx.idLista().ID() != null && ctx.tipoDato() != null) {
-            Object tipoDato = getTipoDato(ctx.tipoDato());
+            Object tipoDato = visitTipoDato(ctx.tipoDato());
             ctx.idLista().ID().stream().forEach(id -> {
                 String ID = id.getText();
                 if (isVarDefined(ID))
@@ -182,13 +253,13 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         return super.visitBloqueDeclaracion(ctx);
     }
 
-
     // Pendiente implementar
     @Override
     public T visitBloqueSegun(pseintGrammarParser.BloqueSegunContext ctx) {
+
         return super.visitBloqueSegun(ctx);
     }
-    
+
     @Override
     public T visitBloqueRepetir(pseintGrammarParser.BloqueRepetirContext ctx) {
         if (ctx.expr() != null) {
@@ -198,7 +269,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         }
         return super.visitBloqueRepetir(ctx);
     }
-    
+
     @Override
     public T visitBloqueMientras(pseintGrammarParser.BloqueMientrasContext ctx) {
         if (ctx.expr() != null)
@@ -206,7 +277,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 visitComandos(ctx.comandos());
         return super.visitBloqueMientras(ctx);
     }
-    
+
     @Override
     public T visitBloquePara(pseintGrammarParser.BloqueParaContext ctx) {
         if (ctx.ID() != null) {
@@ -233,25 +304,30 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         }
         return super.visitBloquePara(ctx);
     }
-    
+
     @Override
     public T visitBloqueSi(pseintGrammarParser.BloqueSiContext ctx) {
         if (ctx.expr() != null) {
             Boolean condition = (Boolean) visitExpr(ctx.expr());
-            if (condition)
+            if (condition){
+                createContext();
                 visitComandos(ctx.comandos(0));
-            else
+                deleteContext();
+            }else{
+                createContext();
                 visitComandos(ctx.comandos(1));
+                deleteContext();
+            }
         }
         return super.visitBloqueSi(ctx);
     }
-    
+
     @Override
     public T visitPrincipal(pseintGrammarParser.PrincipalContext ctx) {
         createContext();
         return super.visitPrincipal(ctx);
     }
-    
+
     /**
      * Pendiente agregar los valores de los parametros
      */
@@ -262,33 +338,33 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         deleteContext();
         return super.visitProcedimiento(ctx);
     }
-    
+
     @Override
     public T visitPseint(pseintGrammarParser.PseintContext ctx) {
         createContext();
         return super.visitPseint(ctx);
     }
-    
+
     private boolean isVarDefined(String id) {
         return contextVariables.peek().containsKey(id);
     }
-    
+
     private Object getVarValue(String id) {
         return contextVariables.peek().get(id);
     }
-    
+
     private void setVarValue(String id, Object value) {
         contextVariables.peek().put(id, value);
     }
-    
+
     private void createContext() {
-        contextVariables.push(new HashMap<>());
+        contextVariables.push(new HashMap<>(contextVariables.peek()));
     }
-    
+
     private void deleteContext() {
         contextVariables.pop();
     }
-    
+
     private Object transformByType(String id, String value) {
         Object var = getVarValue(id);
         final String simpleName = var.getClass().getSimpleName();
@@ -307,21 +383,230 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         return null;
     }
     
-    private Object getTipoDato(pseintGrammarParser.TipoDatoContext tipoDatoContext) {
+    @Override
+    public T visitTipoDato(pseintGrammarParser.TipoDatoContext ctx) {
         Object tipoDato = null;
-        if (tipoDatoContext.tipoDatoEntero() != null)
+        if (ctx.tipoDatoEntero() != null)
             tipoDato = (Integer) 0;
-        else if (tipoDatoContext.tipoDatoReal() != null)
+        else if (ctx.tipoDatoReal() != null)
             tipoDato = (Double) 0.0;
-        else if (tipoDatoContext.tipoDatoCaracter() != null)
+        else if (ctx.tipoDatoCaracter() != null)
             tipoDato = (Character) (char) 0;
-        else if (tipoDatoContext.tipoDatoTexto() != null)
+        else if (ctx.tipoDatoTexto() != null)
             tipoDato = (String) "";
-        else if (tipoDatoContext.tipoDatoLogico() != null)
+        else if (ctx.tipoDatoLogico() != null)
             tipoDato = (Boolean) false;
         else
             Util.semanticError(0, 0, "Tipo de dato invalido");
-        return tipoDato;
+        return (T) tipoDato;
     }
-    
+
+    private Object mul(Object a, Object b, final String op) {
+        boolean aIsInteger = a instanceof Integer;
+        boolean aIsDouble = a instanceof Double;
+
+        boolean bIsInteger = b instanceof Integer;
+        boolean bIsDouble = b instanceof Double;
+
+        double res = 0;
+
+        if ((aIsInteger || aIsDouble) && (bIsInteger || bIsDouble)) {
+            double numa = (Double) Double.parseDouble(a.toString()), numb = (Double) Double.parseDouble(b.toString());
+            switch (op) {
+                case "/":
+                    if (numb == 0)
+                        Util.semanticError(0, 0, "division entre 0");
+                    else
+                        res = (numa / numb);
+                    break;
+                case "*":
+                    res = (numa * numb);
+                    break;
+                case "%":
+                case "mod":
+                    if (numb == 0)
+                        Util.semanticError(0, 0, "division entre 0");
+                    else
+                        res = (numa % numb);
+                    break;
+                case "^":
+                    res = Math.pow(numa, numb);
+                    break;
+                default:
+                    Util.semanticError(0, 0, "operador desconocido");
+            }
+            if (isInteger(res))
+                return (Integer) (int) res;
+            return (Double) res;
+        }
+        return null;
+    }
+
+    private Object sum(Object a, Object b, final String op) {
+        boolean aIsInteger = a instanceof Integer;
+        boolean aIsDouble = a instanceof Double;
+
+        boolean bIsInteger = b instanceof Integer;
+        boolean bIsDouble = b instanceof Double;
+
+        double res = 0;
+
+        if ((aIsInteger || aIsDouble) && (bIsInteger || bIsDouble)) {
+            double numa = (Double) Double.parseDouble(a.toString()), numb = (Double) Double.parseDouble(b.toString());
+            switch (op) {
+                case "+":
+                    res = (numa + numb);
+                    break;
+                default:
+                    Util.semanticError(0, 0, "operador desconocido");
+            }
+            if (isInteger(res))
+                return (Integer) (int) res;
+            return (Double) res;
+        }
+        return null;
+    }
+
+    private Object sub(Object a, Object b, final String op) {
+        boolean aIsInteger = a instanceof Integer;
+        boolean aIsDouble = a instanceof Double;
+
+        boolean bIsInteger = b instanceof Integer;
+        boolean bIsDouble = b instanceof Double;
+
+        double res = 0;
+
+        if ((aIsInteger || aIsDouble) && (bIsInteger || bIsDouble)) {
+            double numa = (Double) Double.parseDouble(a.toString()), numb = (Double) Double.parseDouble(b.toString());
+            switch (op) {
+                case "-":
+                    res = (numa - numb);
+                    break;
+                default:
+                    Util.semanticError(0, 0, "operador desconocido");
+            }
+            if (isInteger(res))
+                return (Integer) (int) res;
+            return (Double) res;
+        }
+        return null;
+    }
+
+    private Object negArit(Object a, final String op) {
+        boolean aIsInteger = a instanceof Integer;
+        boolean aIsDouble = a instanceof Double;
+
+        double res = 0;
+
+        if (aIsInteger || aIsDouble) {
+            double numa = (Double) Double.parseDouble(a.toString());
+            switch (op) {
+                case "-":
+                    res = -numa;
+                    break;
+                default:
+                    Util.semanticError(0, 0, "operador desconocido");
+            }
+            if (isInteger(res))
+                return (Integer) (int) res;
+            return (Double) res;
+        }
+        return null;
+    }
+
+    private Object negBool(Object a, final String op) {
+        boolean aIsBoolean = a instanceof Boolean;
+
+        if (aIsBoolean)
+            switch (op) {
+                case "~":
+                case "no":
+                    return (Boolean) (!(Boolean) a);
+            }
+        return null;
+    }
+
+    private Object binOp(Object a, Object b, final String op) {
+        boolean aIsBoolean = a instanceof Boolean;
+
+        boolean bIsBoolean = b instanceof Boolean;
+
+        if (aIsBoolean && bIsBoolean) {
+            switch (op) {
+                case "o":
+                case "|":
+                    return (Boolean) ((Boolean) a || (Boolean) b);
+                case "y":
+                case "&":
+                    return (Boolean) ((Boolean) a && (Boolean) b);
+                default:
+                    Util.semanticError(0, 0, "operador desconocido");
+            }
+        }
+        return null;
+    }
+
+    private Object compOp(Object a, Object b, final String op) {
+        boolean aIsInteger = a instanceof Integer;
+        boolean aIsDouble = a instanceof Double;
+        boolean aIsString = a instanceof String;
+
+        boolean bIsInteger = b instanceof Integer;
+        boolean bIsDouble = b instanceof Double;
+        boolean bIsString = b instanceof String;
+
+        double res = 0;
+
+        if ((aIsInteger || aIsDouble) && (bIsInteger || bIsDouble)) {
+            double numa = (Double) Double.parseDouble(a.toString()), numb = (Double) Double.parseDouble(b.toString());
+            switch (op) {
+                case "=":
+                    return (Boolean) (cmp(numa, numb) == 0);
+                case "<>":
+                    return (Boolean) (cmp(numa, numb) != 0);
+                case "<":
+                    return (Boolean) (cmp(numa, numb) < 0);
+                case "<=":
+                    return (Boolean) (cmp(numa, numb) <= 0);
+                case ">":
+                    return (Boolean) (cmp(numa, numb) > 0);
+                case ">=":
+                    return (Boolean) (cmp(numa, numb) >= 0);
+                default:
+                    Util.semanticError(0, 0, "operador desconocido");
+            }
+            if (isInteger(res))
+                return (Integer) (int) res;
+            return (Double) res;
+        }
+        if(aIsString && bIsString){
+            String strA = (String) a, strB = (String) b;
+            switch(op){
+                case "=":
+                    return (Boolean) (strA.compareTo(strB) == 0);
+                case "<>":
+                    return (Boolean) (strA.compareTo(strB) != 0);
+                case "<":
+                    return (Boolean) (strA.compareTo(strB) < 0);
+                case "<=":
+                    return (Boolean) (strA.compareTo(strB) <= 0);
+                case ">":
+                    return (Boolean) (strA.compareTo(strB) > 0);
+                case ">=":
+                    return (Boolean) (strA.compareTo(strB) >= 0);
+                default:
+                    Util.semanticError(0, 0, "operador desconocido");
+            }
+        }
+        return null;
+    }
+
+    private int cmp(double a, double b) {
+        double dif = a - b;
+        return Math.abs(dif) < EPS ? 0 : dif < 0 ? -1 : 1;
+    }
+
+    private boolean isInteger(double a) {
+        return cmp(a, Math.round(a)) == 0;
+    }
 }

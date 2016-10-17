@@ -12,7 +12,7 @@ import model.generated.pseintGrammarParser;
 public class Interpreter {
 
     public static void main(String[] args) throws Exception {
-        System.setIn(new FileInputStream(new File("input.txt")));
+        System.setIn(new FileInputStream(new File("input2.txt")));
         ANTLRInputStream input = new ANTLRInputStream(System.in);
         pseintGrammarLexer lexer = new pseintGrammarLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);

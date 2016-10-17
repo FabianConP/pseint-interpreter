@@ -47,7 +47,8 @@ expr                    : valor
                         | expr MULOP expr
                         | expr SUMOP expr
                         | expr RESOP expr
-                        | RESOP expr
+                        | RESOP expr                   
+                        | NEGOP expr
                         | expr BINOP expr
                         | expr COMPOP expr                                          
                         | ID (PARIZQ exprLista PARDER)                          
