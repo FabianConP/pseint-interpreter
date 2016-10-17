@@ -1,5 +1,6 @@
-// Generated from pseintGrammar.g4 by ANTLR 4.5.1
+// Generated from pseintGrammar.g4 by ANTLR 4.5
 package model.generated;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -118,12 +119,6 @@ public interface pseintGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExpr(pseintGrammarParser.ExprContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link pseintGrammarParser#operatorUnary}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link pseintGrammarParser#valor}.
 	 * @param ctx the parse tree

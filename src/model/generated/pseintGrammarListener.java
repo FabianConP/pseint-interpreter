@@ -1,5 +1,6 @@
-// Generated from pseintGrammar.g4 by ANTLR 4.5.1
+// Generated from pseintGrammar.g4 by ANTLR 4.5
 package model.generated;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -187,16 +188,6 @@ public interface pseintGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpr(pseintGrammarParser.ExprContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link pseintGrammarParser#operatorUnary}.
-	 * @param ctx the parse tree
-	 */
-	void enterOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link pseintGrammarParser#operatorUnary}.
-	 * @param ctx the parse tree
-	 */
-	void exitOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link pseintGrammarParser#valor}.
 	 * @param ctx the parse tree

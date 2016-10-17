@@ -44,20 +44,17 @@ bloqueEsperar           : ESPERAR TECLA PYC
                         ;
 
 expr                    : valor
-                        | NEG expr                                    // Negative arithmetic expression
                         | expr MULOP expr
                         | expr SUMOP expr
+                        | expr RESOP expr
+                        | RESOP expr
                         | expr BINOP expr
-                        | expr COMPOP expr
-                        | NEGOP expr                                            
+                        | expr COMPOP expr                                          
                         | ID (PARIZQ exprLista PARDER)                          
                         | ID CORIZQ exprLista CORDER                            
                         | PARIZQ expr PARDER
                         | ID
                         ;
-
-operatorUnary           : NEG ;
-
 
 valor                   : INT
                         | DOUBLE
@@ -95,7 +92,9 @@ ASIGOP                  : '<-';
 COMPOP                  : ('=' | '<>' | '<' | '<=' | '>' | '>=');
 BINOP                   : (O | '|' | Y | '&');
 MULOP                   : ('/' | '*' | '%' | MOD | '^');
-SUMOP                   : ('+' | '-') { _input.LA(1) != ' ' }?;
+
+SUMOP                   : ('+') { _input.LA(1) != ' ' }?;
+RESOP                   : ('-') { _input.LA(1) != ' ' }?;
 
 PYC                     : ';';
 DOSP                    : ':';
@@ -104,7 +103,7 @@ PARDER                  : ')';
 CORIZQ                  : '[';
 CORDER                  : ']';
 COMA                    : ',';
-NEG                     : '-';
+
 
 COMMENT                 : '/*' .*? '*/' -> skip ;
 LINE_COMMENT            : '//' ~[\r\n]* -> skip ;

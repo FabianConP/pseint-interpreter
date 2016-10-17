@@ -1,7 +1,8 @@
-// Generated from pseintGrammar.g4 by ANTLR 4.5.1
+// Generated from pseintGrammar.g4 by ANTLR 4.5
 package model.generated;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -227,18 +228,6 @@ public class pseintGrammarBaseListener implements pseintGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExpr(pseintGrammarParser.ExprContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitOperatorUnary(pseintGrammarParser.OperatorUnaryContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
