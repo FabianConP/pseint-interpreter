@@ -3,7 +3,6 @@ package model.logic;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
 import model.generated.pseintGrammarBaseVisitor;
@@ -28,8 +27,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         ctx.ID().stream().forEach((id) -> {
             ids.add(id.getText());
         });
-        return (T) ids;
 //        return super.visitIdLista(ctx); 
+        return (T) ids;
     }
 
     @Override
@@ -38,8 +37,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         ctx.expr().stream().forEach((expression) -> {
             expressions.add(visitExpr(expression));
         });
-        return (T) expressions;
 //        return super.visitExprLista(ctx); 
+        return (T) expressions;
     }
 
     @Override
@@ -63,7 +62,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                     break;
             }
         }
-        return super.visitValor(ctx);
+        //return super.visitValor(ctx);
+        return null;
     }
 
     @Override
@@ -134,7 +134,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             String ID = ctx.ID().getText();
             return (T) getVarValue(ID);
         }
-        return super.visitExpr(ctx);
+        //return super.visitExpr(ctx);
+        return null;
     }
 
     @Override
@@ -149,7 +150,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 Thread.currentThread().interrupt();
             }
         }
-        return super.visitBloqueEsperar(ctx);
+        //return super.visitBloqueEsperar(ctx);
+        return null;
     }
 
     @Override
@@ -163,7 +165,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 setVarValue(ID, transformByType(ID, value));
             });
         }
-        return super.visitBloqueLeer(ctx);
+        //return super.visitBloqueLeer(ctx);
+        return null;
     }
 
     @Override
@@ -191,7 +194,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         } catch (final Exception e) {
             System.err.print("Error limpiando pantalla");
         }
-        return super.visitBloqueBorrarPantalla(ctx);
+        //return super.visitBloqueBorrarPantalla(ctx);
+        return null;
     }
 
     /**
@@ -218,7 +222,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 setVarValue(ID, matrix);
             });
         }
-        return super.visitBloqueDimension(ctx);
+        //return super.visitBloqueDimension(ctx);
+        return null;
     }
 
     /**
@@ -236,7 +241,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 return null;
             setVarValue(id, value);
         }
-        return super.visitBloqueAsignacion(ctx);
+        //return super.visitBloqueAsignacion(ctx);
+        return null;
     }
 
     @Override
@@ -250,32 +256,41 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 setVarValue(ID, tipoDato);
             });
         }
-        return super.visitBloqueDeclaracion(ctx);
+        //return super.visitBloqueDeclaracion(ctx);
+        return null;
     }
 
     // Pendiente implementar
     @Override
     public T visitBloqueSegun(pseintGrammarParser.BloqueSegunContext ctx) {
 
-        return super.visitBloqueSegun(ctx);
+        //return super.visitBloqueSegun(ctx);
+        return null;
     }
 
     @Override
     public T visitBloqueRepetir(pseintGrammarParser.BloqueRepetirContext ctx) {
         if (ctx.expr() != null) {
             do {
+                createContext();
                 visitComandos(ctx.comandos());
+                deleteContext();
             } while ((Boolean) visitExpr(ctx.expr()));
         }
-        return super.visitBloqueRepetir(ctx);
+        //return super.visitBloqueRepetir(ctx);
+        return null;
     }
 
     @Override
     public T visitBloqueMientras(pseintGrammarParser.BloqueMientrasContext ctx) {
-        if (ctx.expr() != null)
+        if (ctx.expr() != null){
+            createContext();
             while ((Boolean) visitExpr(ctx.expr()))
                 visitComandos(ctx.comandos());
-        return super.visitBloqueMientras(ctx);
+            deleteContext();
+        }
+//        return super.visitBloqueMientras(ctx);
+        return null;
     }
 
     @Override
@@ -302,24 +317,26 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 setVarValue(ID, ((Integer) getVarValue(ID)) + step);
             }
         }
-        return super.visitBloquePara(ctx);
+//        return super.visitBloquePara(ctx);
+        return null;
     }
 
     @Override
     public T visitBloqueSi(pseintGrammarParser.BloqueSiContext ctx) {
         if (ctx.expr() != null) {
             Boolean condition = (Boolean) visitExpr(ctx.expr());
-            if (condition){
+            if (condition) {
                 createContext();
                 visitComandos(ctx.comandos(0));
                 deleteContext();
-            }else{
+            } else {
                 createContext();
                 visitComandos(ctx.comandos(1));
                 deleteContext();
             }
         }
-        return super.visitBloqueSi(ctx);
+//        return super.visitBloqueSi(ctx);
+        return null;
     }
 
     @Override
@@ -382,7 +399,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         }
         return null;
     }
-    
+
     @Override
     public T visitTipoDato(pseintGrammarParser.TipoDatoContext ctx) {
         Object tipoDato = null;
@@ -579,9 +596,9 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 return (Integer) (int) res;
             return (Double) res;
         }
-        if(aIsString && bIsString){
+        if (aIsString && bIsString) {
             String strA = (String) a, strB = (String) b;
-            switch(op){
+            switch (op) {
                 case "=":
                     return (Boolean) (strA.compareTo(strB) == 0);
                 case "<>":
