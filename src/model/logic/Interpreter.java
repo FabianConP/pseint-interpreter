@@ -13,7 +13,7 @@ public class Interpreter {
 
     public static void main(String[] args) throws Exception {
 //        System.setIn(new FileInputStream(new File("input2.txt")));
-        ANTLRInputStream input = new ANTLRInputStream(new FileInputStream("input3.txt"));
+        ANTLRInputStream input = new ANTLRInputStream(new FileInputStream("test.txt"));
         pseintGrammarLexer lexer = new pseintGrammarLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         pseintGrammarParser parser = new pseintGrammarParser(tokens);

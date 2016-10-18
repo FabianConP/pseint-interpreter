@@ -20,8 +20,9 @@ public class ProceduresVisitor<T> extends pseintGrammarBaseVisitor<T> {
         if (ctx.ID() != null) {
             String nameProc = ctx.ID().getText().toLowerCase();
             String id = Procedure.buildId(nameProc, 0);
-            if (procedures.containsKey(id))
-                Util.semanticError(ctx.ID(), "ya existe un procedimiento con el mismo nombre y numero de paramatros");
+            //? if (procedures.containsKey(id))
+            if (procedures.containsKey(nameProc))
+                Util.semanticError(ctx.ID(), "el simbolo con nombre \"" + nameProc + "\" ya ha sido declarado");
             Procedure procedure = new Procedure(nameProc, new LinkedList<String>(), null, null);
             procedures.put(id, procedure);
         }
@@ -33,13 +34,15 @@ public class ProceduresVisitor<T> extends pseintGrammarBaseVisitor<T> {
     public T visitProcedimiento(pseintGrammarParser.ProcedimientoContext ctx
     ) {
         if (ctx.ID().size() > 0) {
-            String nameProc = ctx.ID(ctx.ID().size() - 1).getText().toLowerCase();
+            int procIdPos = ctx.ID().size() - 1;
+            String nameProc = ctx.ID(procIdPos).getText().toLowerCase();
             int numParams = ctx.idLista() == null ? 0 : ctx.idLista().ID().size();
             String id = Procedure.buildId(nameProc, numParams);
-            if (procedures.containsKey(id))
-                Util.semanticError(ctx.ID(1), "ya existe un procedimiento con el mismo nombre y numero de paramatros");
+            //? if (procedures.containsKey(id))
+            if (procedures.containsKey(nameProc))
+                Util.semanticError(ctx.ID(procIdPos), "el simbolo con nombre \"" + nameProc + "\" ya ha sido declarado");
             Variable returnVar = null;
-            if (ctx.ID().size() > 1) {
+            if (procIdPos > 0) {
                 String idReturnVarName = ctx.ID(0).getText();
                 returnVar = new Variable(idReturnVarName, "", false);
             }
@@ -47,7 +50,8 @@ public class ProceduresVisitor<T> extends pseintGrammarBaseVisitor<T> {
             if(ctx.idLista() != null && ctx.idLista().ID() != null)
                 ctx.idLista().ID().stream().forEach(idParam -> params.add(idParam.getText()));
             Procedure procedure = new Procedure(nameProc, params, returnVar, ctx);
-            procedures.put(id, procedure);
+            //? procedures.put(id, procedure);
+            procedures.put(nameProc, procedure);
         }
 //        return super.visitProcedimiento(ctx);
         return null;

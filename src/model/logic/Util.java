@@ -15,13 +15,13 @@ public class Util {
     }
     
     public static void semanticError(int line, int col, String message){
-        System.err.printf("<%d:%d> Error semantico %s.", line, col, message);
-        System.exit(-1);
+        System.err.printf("<%d:%d> Error semantico: %s.\n", line, col, message);
+        System.exit(0);
     }
     
     
     public static void semanticError(TerminalNode node, String message){
-        System.err.printf("<%d:%d> Error semantico %s.", node.getSymbol().getLine(), node.getSymbol().getCharPositionInLine(), message);
-        System.exit(-1);
+        System.err.printf("<%d:%d> Error semantico: %s.\n", node.getSymbol().getLine(), node.getSymbol().getCharPositionInLine(), message);
+        System.exit(0);
     }
 }    
