@@ -1,17 +1,22 @@
 package model.logic;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class Variable {
 
     private String name;
     private String type;
     private boolean initialized;
     private Object value;
+    private List<Integer> dims;
 
     public Variable(String name, String type, boolean initialized, Object value) {
         this.name = name;
         this.type = type;
         this.initialized = initialized;
         this.value = value;
+        dims = new LinkedList<>();
     }
 
     public Variable(String name, String type, boolean initialized) {
@@ -35,6 +40,7 @@ public class Variable {
                 value = false;
                 break;
         }
+        dims = new LinkedList<>();
     }
 
     public String getName() {
@@ -69,4 +75,12 @@ public class Variable {
         this.value = value;
     }
 
+    public List<Integer> getDims() {
+        return dims;
+    }
+
+    public void setDims(List<Integer> dims) {
+        this.dims = dims;
+    }
+    
 }

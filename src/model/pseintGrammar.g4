@@ -54,7 +54,7 @@ expr                    : valor
                         | expr COMPOP expr                                          
                         | expr BINOP expr
                         | llamarFuncion
-                        | ID CORIZQ exprLista CORDER                            
+                        | varArreglo
                         | PARIZQ expr PARDER
                         | ID
                         ;

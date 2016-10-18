@@ -147,8 +147,19 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             if (procedure.getReturnVar() == null)
                 Util.semanticError(0, 0, "Error semantico: la funcion “" + name + "” es usada en una expresion pero no retorna ningun valor");
             return visitLlamarFuncion(ctx.llamarFuncion());
-        } else if (ctx.CORIZQ() != null) {
-
+        } else if (ctx.varArreglo() != null) {
+            String id = ctx.varArreglo().ID().getText();
+            String tradArray = "";
+            if (ctx.varArreglo().CORIZQ() != null) {
+                List<Object> dims = (List<Object>) visitExprLista(ctx.varArreglo().exprLista());
+                tradArray = generateTradDimension(dims);
+            }
+            String tradID = id + tradArray;
+            if (!isVarDefined(tradID))
+                Util.semanticError(0, 0, "variable no definida o dimensiones incorrectas");
+            if (!getVar(tradID).isInitialized())
+                Util.semanticError(0, 0, "variable de arreglo  no ha sido inicializada");
+            return (T) getVar(tradID).getValue();
         } else if (ctx.PARIZQ() != null) {
             return visitExpr(ctx.expr(0));
         } else if (ctx.ID() != null) {
@@ -291,48 +302,49 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         return null;
     }
 
-    /**
-     * Pendiente falta guardar de alguna forma el tamanio de cada dimension
-     */
     @Override
     public T visitBloqueDimension(pseintGrammarParser.BloqueDimensionContext ctx) {
         if (ctx.varArreglo() != null) {
             ctx.varArreglo().stream().forEach(varArreglo -> {
                 String ID = varArreglo.ID().getText();
-                if (isVarDefined(ID))
-                    Util.semanticError(varArreglo.ID(), "La variable " + ID + " ya ha sido declarada");
-                List<Object> expressions = (List<Object>) visitExprLista(varArreglo.exprLista());
-                int totalSize = 1;
-                for (Object size : expressions) {
-                    if (!Integer.class.isInstance(size))
-                        Util.semanticError(0, 0, size.toString());
-                    Integer curSize = (Integer) size;
-                    if (curSize <= 0)
-                        Util.semanticError(0, 0, "Valor no positivo");
-                    totalSize *= curSize;
+                if (!isVarDefined(ID))
+                    Util.semanticError(0, 0, "la variable " + ID + " no ha sido declarada");
+                else if (getVar(ID).isInitialized())
+                    Util.semanticError(0, 0, "la variable " + ID + " ya se declaro como no arreglo");
+                List<Object> dims = (List<Object>) visitExprLista(varArreglo.exprLista());
+                List<String> tradAllID = tradAllDimension(ID, dims);
+                String type = getVar(ID).getType();
+                for (String tradID : tradAllID) {
+                    if (isVarDefined(tradID))
+                        Util.semanticError(0, 0, "la variable " + tradID + " ya ha sido declarada");
+                    createVar(tradID, type);
                 }
-                int[] matrix = new int[totalSize];
-                setVarValue(ID, matrix);
+                deleteVar(ID);
             });
         }
         //return super.visitBloqueDimension(ctx);
         return null;
     }
 
-    /**
-     * Pendiente manejar la asignacion para arreglos n-dimensionales
-     */
     @Override
     public T visitBloqueAsignacion(pseintGrammarParser.BloqueAsignacionContext ctx) {
         if (ctx.ID() != null) {
             String id = ctx.ID().getText();
-            if (!isVarDefined(id))
-                return null;
-            String type = getVar(id).getType();
+            String tradArray = "";
+            if (ctx.CORIZQ() != null) {
+                List<Object> dims = (List<Object>) visitExprLista(ctx.exprLista());
+                checkDimensions(dims);
+                for (Object dim : dims)
+                    tradArray += "$" + dim;
+            }
+            String tradID = id + tradArray;
+            if (!isVarDefined(tradID))
+                Util.semanticError(0, 0, "no se ha definido el arreglo con las posiciones ...");
+            String type = getVar(tradID).getType();
             Object value = visitExpr(ctx.expr());
             if (!validAssig(type, value))
-                Util.semanticError(ctx.ID(), "declaracion de tipo diferente");
-            setVarValue(id, value);
+                Util.semanticError(0, 0, "declaracion de tipo diferente");
+            setVarValue(id + tradArray, value);
         }
         //return super.visitBloqueAsignacion(ctx);
         return null;
@@ -438,7 +450,11 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             while (cmp(Double.parseDouble(getVar(ID).getValue().toString()) - step, limit) != 0) {
 //                createContext();
                 visitComandos(ctx.comandos());
-                setVarValue(ID, Double.parseDouble(getVar(ID).getValue().toString()) + step);
+                Double next = Double.parseDouble(getVar(ID).getValue().toString()) + step;
+                if (cmp(Math.round(next), next) == 0)
+                    setVarValue(ID, (Integer) (int) Math.round(next));
+                else
+                    setVarValue(ID, next);
 //                deleteContext();
             }
         }
@@ -505,6 +521,10 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
 
     private void createVar(String id, String type) {
         contextVariables.peek().put(id, new Variable(id, type, false));
+    }
+
+    private void deleteVar(String id) {
+        contextVariables.peek().remove(id);
     }
 
     private Variable getVar(String id) {
@@ -804,6 +824,38 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             }
         }
         return null;
+    }
+
+    private String generateTradDimension(List<Object> dims) {
+        String trad = "";
+        checkDimensions(dims);
+        for (int i = 0; i < dims.size(); i++)
+            trad += "$" + dims.get(i);
+        return trad;
+    }
+
+    private List<String> tradAllDimension(String varName, List<Object> dims) {
+        List<String> all = new LinkedList<>();
+        checkDimensions(dims);
+        generateAllDimensions(dims, 0, varName, all);
+        return all;
+    }
+
+    private void generateAllDimensions(List<Object> dims, int ndim, String path, List<String> all) {
+        if (ndim == dims.size()) {
+            all.add(path);
+        } else
+            for (int i = 0; i < (Integer) dims.get(ndim); i++)
+                generateAllDimensions(dims, ndim + 1, path + "$" + i, all);
+    }
+
+    private void checkDimensions(List<Object> dims) {
+        for (Object dim : dims) {
+            if (!Integer.class.isInstance(dim))
+                Util.semanticError(0, 0, "las dimensiones deben ser enteras");
+            if ((Integer) dim < 0)
+                Util.semanticError(0, 0, "las dimensiones deben ser no negativas <- EN TIEMPO DE EJECUCION");
+        }
     }
 
     private int cmp(double a, double b) {
