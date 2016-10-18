@@ -13,15 +13,23 @@ public class Interpreter {
 
     public static void main(String[] args) throws Exception {
 //        System.setIn(new FileInputStream(new File("input2.txt")));
-        ANTLRInputStream input = new ANTLRInputStream(new FileInputStream("input2.txt"));
+        ANTLRInputStream input = new ANTLRInputStream(new FileInputStream("input3.txt"));
         pseintGrammarLexer lexer = new pseintGrammarLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         pseintGrammarParser parser = new pseintGrammarParser(tokens);
         ParseTree tree = parser.pseint();
 
-        MyVisitor<Object> loader = new MyVisitor<>();
+        ProceduresVisitor<Object> procVisitor = new ProceduresVisitor<>();
         try {
-        loader.visit(tree);
+            procVisitor.visit(tree);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Algo se jodio mirando las funciones");
+        }
+
+        MyVisitor<Object> loader = new MyVisitor<>(procVisitor.getProcedures());
+        try {
+            loader.visit(tree);
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Algo se jodio");

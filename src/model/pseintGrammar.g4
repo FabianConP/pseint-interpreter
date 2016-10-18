@@ -1,9 +1,9 @@
 grammar pseintGrammar;		
 
-pseint                  : (procedimiento)* principal (procedimiento)* EOF
+pseint                  : (procedimiento)* principal EOF
                         ;
 
-procedimiento           : (FUNCION | SUBPROCESO) (ID ASIGOP)? ID (PARIZQ (ID)* PARDER)? comandos (FINFUNCION | FINSUBPROCESO) ;
+procedimiento           : (FUNCION | SUBPROCESO) (ID ASIGOP)? ID (PARIZQ idLista? PARDER)? comandos (FINFUNCION | FINSUBPROCESO) ;
 
 principal		: (PROCESO | ALGORITMO) ID comandos (FINPROCESO | FINALGORITMO) ;
 
@@ -23,10 +23,11 @@ comando 	        : bloqueSi
                         | bloqueEscribir 
                         | bloqueLeer
                         | bloqueEsperar
+                        | bloqueLlamarFuncion
                         ;
 			        
 bloqueSi                : SI expr ENTONCES comandos (SINO comandos)? FINSI ;
-bloquePara              : PARA ID  (CORIZQ exprLista  CORDER)? ASIGOP expr HASTA expr (CON PASO expr)? HACER comandos FINPARA ;
+bloquePara              : PARA ID (CORIZQ exprLista  CORDER)? ASIGOP expr HASTA expr (CON PASO expr)? HACER comandos FINPARA ;
 bloqueMientras          : MIENTRAS expr HACER comandos FINMIENTRAS ;
 bloqueRepetir           : REPETIR comandos HASTA QUE expr ;
 bloqueSegun             : SEGUN expr HACER casoLista (DE OTRO MODO DOSP comandos)? FINSEGUN ;
@@ -41,7 +42,8 @@ bloqueEscribir          : ESCRIBIR exprLista PYC ;
 bloqueLeer              : LEER idLista PYC ;
 bloqueEsperar           : ESPERAR TECLA PYC
                         | ESPERAR expr (SEGUNDOS | MILISEGUNDOS) PYC
-                        ;
+                        ; 
+bloqueLlamarFuncion     : llamarFuncion PYC;
 
 expr                    : valor
                         | expr MULOP expr
@@ -49,9 +51,9 @@ expr                    : valor
                         | expr RESOP expr
                         | RESOP expr                   
                         | NEGOP expr
-                        | expr BINOP expr
                         | expr COMPOP expr                                          
-                        | ID (PARIZQ exprLista PARDER)                          
+                        | expr BINOP expr
+                        | llamarFuncion
                         | ID CORIZQ exprLista CORDER                            
                         | PARIZQ expr PARDER
                         | ID
@@ -66,6 +68,7 @@ valor                   : INT
 exprLista               : expr (COMA expr)* ;
 idLista                 : ID (COMA ID)* ;
 casoLista               : (CASO expr DOSP comandos)*;
+llamarFuncion           : ID PARIZQ exprLista? PARDER;
 
 varArreglo              : ID CORIZQ exprLista CORDER;
 

@@ -220,6 +220,18 @@ public class pseintGrammarBaseListener implements pseintGrammarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterBloqueLlamarFuncion(pseintGrammarParser.BloqueLlamarFuncionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBloqueLlamarFuncion(pseintGrammarParser.BloqueLlamarFuncionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterExpr(pseintGrammarParser.ExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -275,6 +287,18 @@ public class pseintGrammarBaseListener implements pseintGrammarListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitCasoLista(pseintGrammarParser.CasoListaContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLlamarFuncion(pseintGrammarParser.LlamarFuncionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLlamarFuncion(pseintGrammarParser.LlamarFuncionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

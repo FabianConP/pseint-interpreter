@@ -1,5 +1,23 @@
+subproceso b<-sumatoria(c)
+    definir b como entero;
+    b <- (c*(c + 1))/2;
+finsubproceso
+
+subproceso a
+finsubproceso
+
 proceso main
-    /*definir a como real;
+    definir n como entero;
+    escribir "Ingresar el n";
+    leer n;
+    definir i como entero;
+    para i <- 1 hasta n hacer
+        escribir sumatoria(i);
+    finpara
+finalgoritmo
+
+/*proceso main
+    definir a como real;
     definir b como numerico;
     a <- 2*3.0 + 1;
     escribir a;
@@ -42,7 +60,7 @@ proceso main
             escribir "miau";
         de otro modo:
             escribir "se murio";
-    finsegun*/
+    finsegun
     escribir "Digite la tabla de multiplicar que desea";
     definir tabla como entero;
     leer tabla;
@@ -51,5 +69,26 @@ proceso main
     para cont <- 1 hasta limite con paso 0.2 hacer
         escribir cont + tabla;
     finpara
+
+    definir a,b,c como logico;
+    a <- verdadero;
+    c <- verdadero;
+    b <- (3<2);
     
-finalgoritmo
+    si a & c | a & b | c entonces //Correcto
+        Escribir "Si";
+    finsi
+
+    si 4 < 4 | a | b | falso entonces //Error semantico
+        Escribir "doble si"; 
+    finsi
+
+    Definir a Como Real;
+    Escribir a;
+
+    Escribir 3*4;
+
+    Escribir "Hola";
+    Escribir "Mundo" + 2;
+
+finalgoritmo*/

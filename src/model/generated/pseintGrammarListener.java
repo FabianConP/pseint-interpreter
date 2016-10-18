@@ -178,6 +178,16 @@ public interface pseintGrammarListener extends ParseTreeListener {
 	 */
 	void exitBloqueEsperar(pseintGrammarParser.BloqueEsperarContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link pseintGrammarParser#bloqueLlamarFuncion}.
+	 * @param ctx the parse tree
+	 */
+	void enterBloqueLlamarFuncion(pseintGrammarParser.BloqueLlamarFuncionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link pseintGrammarParser#bloqueLlamarFuncion}.
+	 * @param ctx the parse tree
+	 */
+	void exitBloqueLlamarFuncion(pseintGrammarParser.BloqueLlamarFuncionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link pseintGrammarParser#expr}.
 	 * @param ctx the parse tree
 	 */
@@ -227,6 +237,16 @@ public interface pseintGrammarListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitCasoLista(pseintGrammarParser.CasoListaContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link pseintGrammarParser#llamarFuncion}.
+	 * @param ctx the parse tree
+	 */
+	void enterLlamarFuncion(pseintGrammarParser.LlamarFuncionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link pseintGrammarParser#llamarFuncion}.
+	 * @param ctx the parse tree
+	 */
+	void exitLlamarFuncion(pseintGrammarParser.LlamarFuncionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link pseintGrammarParser#varArreglo}.
 	 * @param ctx the parse tree

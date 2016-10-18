@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Stack;
 import model.generated.pseintGrammarBaseVisitor;
@@ -11,17 +12,27 @@ import model.generated.pseintGrammarParser;
 
 public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
 
-    private Stack<Map<String, Object>> contextVariables;
+    private Stack<Map<String, Variable>> contextVariables;
     private Stack<List<String>> contextVariablesNames;
     private final Scanner in;
 
+    private HashMap<String, Procedure> procedures;
+
     private final double EPS = 1e-9;
 
-    public MyVisitor() {
+    private static final String INTEGER = "Integer";
+    private static final String DOUBLE = "Double";
+    private static final String CHARACTER = "Character";
+    private static final String STRING = "String";
+    private static final String BOOLEAN = "Boolean";
+
+    public MyVisitor(HashMap<String, Procedure> procedures) {
         contextVariables = new Stack<>();
         contextVariablesNames = new Stack<>();
         contextVariables.push(new HashMap<>());
         in = new Scanner(System.in);
+
+        this.procedures = procedures;
     }
 
     @Override
@@ -61,7 +72,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 case "falso":
                     return (T) (Boolean) false;
                 default:
-                    Util.semanticError(0, 0, value);
+                    Util.semanticError(ctx.BOOL(), value);
                     break;
             }
         }
@@ -79,7 +90,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             Object b = visitExpr(ctx.expr(1));
             Object result = mul(a, b, op);
             if (result == null)
-                Util.semanticError(0, 0, "error en mult");
+                Util.semanticError(ctx.MULOP(), "error en mult");
             return (T) result;
         } else if (ctx.SUMOP() != null) {
             final String op = ctx.SUMOP().getText().toLowerCase();
@@ -87,7 +98,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             Object b = visitExpr(ctx.expr(1));
             Object result = sum(a, b, op);
             if (result == null)
-                Util.semanticError(0, 0, "error en suma");
+                Util.semanticError(ctx.SUMOP(), "error en suma");
             return (T) result;
         } else if (ctx.RESOP() != null) {
             if (ctx.expr(1) != null) {
@@ -96,14 +107,14 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 Object b = visitExpr(ctx.expr(1));
                 Object result = sub(a, b, op);
                 if (result == null)
-                    Util.semanticError(0, 0, "error en resta");
+                    Util.semanticError(ctx.RESOP(), "error en resta");
                 return (T) result;
             } else {
                 final String op = ctx.RESOP().getText().toLowerCase();
                 Object a = visitExpr(ctx.expr(0));
                 Object result = negArit(a, op);
                 if (result == null)
-                    Util.semanticError(0, 0, "error en negacion aritmetica");
+                    Util.semanticError(ctx.RESOP(), "error en negacion aritmetica");
                 return (T) result;
             }
         } else if (ctx.NEGOP() != null) {
@@ -111,7 +122,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             Object a = visitExpr(ctx.expr(0));
             Object result = negBool(a, op);
             if (result == null)
-                Util.semanticError(0, 0, "error en negacion booleana");
+                Util.semanticError(ctx.NEGOP(), "error en negacion booleana");
             return (T) result;
         } else if (ctx.BINOP() != null) {
             final String op = ctx.BINOP().getText().toLowerCase();
@@ -119,7 +130,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             Object b = visitExpr(ctx.expr(1));
             Object result = binOp(a, b, op);
             if (result == null)
-                Util.semanticError(0, 0, "error en operacion binaria");
+                Util.semanticError(ctx.BINOP(), "error en operacion binaria");
             return (T) result;
         } else if (ctx.COMPOP() != null) {
             final String op = ctx.COMPOP().getText().toLowerCase();
@@ -127,18 +138,92 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             Object b = visitExpr(ctx.expr(1));
             Object result = compOp(a, b, op);
             if (result == null)
-                Util.semanticError(0, 0, "error en comparacion");
+                Util.semanticError(ctx.COMPOP(), "error en comparacion");
             return (T) result;
-        } else if (ctx.PARIZQ() != null) {
-            return visitExpr(ctx.expr(0));
+        } else if (ctx.llamarFuncion() != null) {
+            String name = ctx.llamarFuncion().ID().getText();
+            int numParams = (ctx.llamarFuncion().exprLista() == null) ? 0 : ctx.llamarFuncion().exprLista().expr().size();
+            Procedure procedure = procedures.get(Procedure.buildId(name, numParams));
+            if (procedure.getReturnVar() == null)
+                Util.semanticError(0, 0, "Error semantico: la funcion “" + name + "” es usada en una expresion pero no retorna ningun valor");
+            return visitLlamarFuncion(ctx.llamarFuncion());
         } else if (ctx.CORIZQ() != null) {
 
+        } else if (ctx.PARIZQ() != null) {
+            return visitExpr(ctx.expr(0));
         } else if (ctx.ID() != null) {
             String ID = ctx.ID().getText();
-            return (T) getVarValue(ID);
+            if (!isVarDefined(ID) && !isProcDefined(ID))
+                Util.semanticError(ctx.ID(), "la variable " + ID + " no ha sido declarada");
+            if (isVarDefined(ID)) {
+                if (!getVar(ID).isInitialized())
+                    Util.semanticError(ctx.ID(), "la variable no ha sido inicializada");
+                return (T) getVar(ID).getValue();
+            }
+            if (isProcDefined(ID)) {
+                createContextProcedure(new LinkedList<>(), new LinkedList<>());
+                String id = ID + "#0";
+                Procedure procedure = procedures.get(id);
+                if (procedure.getReturnVar() != null) {
+                    Variable returnVar = procedure.getReturnVar();
+                    if (!isVarDefined(returnVar.getName()))
+                        Util.semanticError(0, 0, "la variable de retorno no fue creada");
+                    Variable var = getVar(returnVar.getName());
+                    if (!var.isInitialized())
+                        Util.semanticError(0, 0, "variable de retorno no inicializada");
+                    deleteContextProcedure();
+                    return (T) var.getValue();
+                } else
+                    deleteContextProcedure();
+            }
         }
         //return super.visitExpr(ctx);
         return null;
+    }
+
+    @Override
+    public T visitLlamarFuncion(pseintGrammarParser.LlamarFuncionContext ctx) {
+        String name = ctx.ID().getText().toLowerCase();
+        int numParams = 0;
+        if (ctx.exprLista() != null && ctx.exprLista().expr() != null)
+            numParams = ctx.exprLista().expr().size();
+        String id = Procedure.buildId(name, numParams);
+        boolean methodExists = isProcDefined(name);
+        if (methodExists) {
+            if (!procedures.containsKey(id))
+                Util.semanticError(ctx.ID(), "numero incorrecto de parametros al llamar la funcion “" + name + "”");
+        } else
+            Util.semanticError(ctx.ID(), "el metodo " + name + " no existe");
+        List<Object> paramValues = new LinkedList<>();
+        if (ctx.exprLista() != null)
+            paramValues = (List<Object>) visitExprLista(ctx.exprLista());
+        Procedure procedure = procedures.get(id);
+        List<String> paramNames = procedure.getParamNames();
+        createContextProcedure(paramNames, paramValues);
+        visitComandos(procedure.getContext().comandos());
+        if (procedure.getReturnVar() != null) {
+            Variable returnVar = procedure.getReturnVar();
+            if (!isVarDefined(returnVar.getName()))
+                Util.semanticError(0, 0, "la variable de retorno no fue creada");
+            Variable var = getVar(returnVar.getName());
+            if (!var.isInitialized())
+                Util.semanticError(0, 0, "variable de retorno no inicializada");
+            deleteContextProcedure();
+            return (T) var.getValue();
+        } else
+            deleteContextProcedure();
+//        return super.visitLlamarFuncion(ctx);
+        return null;
+    }
+
+    @Override
+    public T visitBloqueLlamarFuncion(pseintGrammarParser.BloqueLlamarFuncionContext ctx) {
+        String name = ctx.llamarFuncion().ID().getText();
+        int numParams = (ctx.llamarFuncion().exprLista() == null) ? 0 : ctx.llamarFuncion().exprLista().expr().size();
+        Procedure procedure = procedures.get(Procedure.buildId(name, numParams));
+        if (procedure != null && procedure.getReturnVar() != null)
+            Util.semanticError(0, 0, "Error semantico: la funcion “" + name + "” retorna un valor que debe ir en una expresion");
+        return super.visitBloqueLlamarFuncion(ctx);
     }
 
     @Override
@@ -179,10 +264,13 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         if (ctx.exprLista() != null) {
             StringBuilder out = new StringBuilder();
             ((List<Object>) visitExprLista(ctx.exprLista())).stream().forEach((expression) -> {
-                out.append(expression.toString());
-                out.append('\n');
+                String value = expression.toString();
+                if (Boolean.class.isInstance(expression))
+                    value = ((Boolean) expression ? "verdadero" : "falso");
+                out.append(value);
+//                out.append('\n');
             });
-            System.out.print(out.toString());
+            System.out.println(out.toString());
         }
         return null;
 //        return super.visitBloqueEscribir(ctx);
@@ -212,7 +300,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             ctx.varArreglo().stream().forEach(varArreglo -> {
                 String ID = varArreglo.ID().getText();
                 if (isVarDefined(ID))
-                    Util.semanticError(0, 0, "La variable " + ID + " ya ha sido declarada");
+                    Util.semanticError(varArreglo.ID(), "La variable " + ID + " ya ha sido declarada");
                 List<Object> expressions = (List<Object>) visitExprLista(varArreglo.exprLista());
                 int totalSize = 1;
                 for (Object size : expressions) {
@@ -240,25 +328,32 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             String id = ctx.ID().getText();
             if (!isVarDefined(id))
                 return null;
-            Object var = getVarValue(id);
+            String type = getVar(id).getType();
             Object value = visitExpr(ctx.expr());
-            if (!Util.sameType(var, value))
-                Util.semanticError(0, 0, "declaracion de tipo diferente");
+            if (!validAssig(type, value))
+                Util.semanticError(ctx.ID(), "declaracion de tipo diferente");
             setVarValue(id, value);
         }
         //return super.visitBloqueAsignacion(ctx);
         return null;
     }
 
+    private boolean validAssig(String type, Object value) {
+        String typeValue = value.getClass().getSimpleName();
+        if (type.equals(DOUBLE))
+            return typeValue.equals(DOUBLE) || typeValue.equals(INTEGER);
+        return type.equals(typeValue);
+    }
+
     @Override
     public T visitBloqueDeclaracion(pseintGrammarParser.BloqueDeclaracionContext ctx) {
         if (ctx.idLista().ID() != null && ctx.tipoDato() != null) {
-            Object tipoDato = visitTipoDato(ctx.tipoDato());
+            String tipoDato = (String) visitTipoDato(ctx.tipoDato());
             ctx.idLista().ID().stream().forEach(id -> {
                 String ID = id.getText();
-                if (isVarDefined(ID))
-                    Util.semanticError(0, 0, "La variable " + ID + " ya ha sido declarada");
-                setVarValue(ID, tipoDato);
+                if (isVarDefined(ID) || isProcDefined(ID))
+                    Util.semanticError(id, "La variable " + ID + " ya ha sido declarada");
+                createVar(ID, tipoDato);
             });
         }
         //return super.visitBloqueDeclaracion(ctx);
@@ -269,7 +364,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     @Override
     public T visitBloqueSegun(pseintGrammarParser.BloqueSegunContext ctx) {
         if (ctx.expr() != null) {
-            createContext();
+//            createContext();
             Object var = visitExpr(ctx.expr());
             boolean entered = false;
             if (ctx.casoLista() != null) {
@@ -278,11 +373,12 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                     if (var.equals(visitExpr(ctx.casoLista().expr(i)))) {
                         visitComandos(ctx.casoLista().comandos(i));
                         entered = true;
+                        break;
                     }
             }
             if (ctx.DE() != null && ctx.OTRO() != null && ctx.MODO() != null && !entered)
                 visitComandos(ctx.comandos());
-            deleteContext();
+//            deleteContext();
         }
         //return super.visitBloqueSegun(ctx);
         return null;
@@ -293,9 +389,9 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     ) {
         if (ctx.expr() != null) {
             do {
-                createContext();
+//                createContext();
                 visitComandos(ctx.comandos());
-                deleteContext();
+//                deleteContext();
             } while (!evalBooleanExpr(visitExpr(ctx.expr())));
         }
         //return super.visitBloqueRepetir(ctx);
@@ -307,9 +403,9 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     ) {
         if (ctx.expr() != null) {
             while (evalBooleanExpr(visitExpr(ctx.expr()))) {
-                createContext();
+//                createContext();
                 visitComandos(ctx.comandos());
-                deleteContext();
+//                deleteContext();
             }
         }
 //        return super.visitBloqueMientras(ctx);
@@ -322,28 +418,28 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         if (ctx.ID() != null) {
             String ID = ctx.ID().getText();
             if (!isVarDefined(ID))
-                Util.semanticError(0, 0, "No ha sido declarada ...");
-            Object var = getVarValue(ID);
+                Util.semanticError(ctx.ID(), "No ha sido declarada ...");
+            String type = getVar(ID).getType();
             Object value = visitExpr(ctx.expr(0));
-            if (!Util.sameType(var, value))
-                Util.semanticError(0, 0, "Incompatibilidad de tipos...");
+            if (!validAssig(type, value))
+                Util.semanticError(ctx.ID(), "Incompatibilidad de tipos...");
             if (!Integer.class.isInstance(value) && !Double.class.isInstance(value))
-                Util.semanticError(0, 0, "Incompatibilidad de tipos...");
+                Util.semanticError(ctx.ID(), "Incompatibilidad de tipos...");
             setVarValue(ID, value);
             Double limit = (Double) Double.parseDouble(visitExpr(ctx.expr(1)).toString());
             Double step = 1.0;
-            if (ctx.expr(2) != null){
+            if (ctx.expr(2) != null) {
                 Object valueStep = visitExpr(ctx.expr(2));
                 if (!Integer.class.isInstance(valueStep) && !Double.class.isInstance(valueStep))
                     Util.semanticError(0, 0, "Incompatibilidad de tipos...");
                 else
                     step = (Double) Double.parseDouble(valueStep.toString());
             }
-            while (cmp(Double.parseDouble(getVarValue(ID).toString()), limit) <= 0) {
-                createContext();
+            while (cmp(Double.parseDouble(getVar(ID).getValue().toString()) - step, limit) != 0) {
+//                createContext();
                 visitComandos(ctx.comandos());
-                setVarValue(ID, Double.parseDouble(getVarValue(ID).toString()) + step);
-                deleteContext();
+                setVarValue(ID, Double.parseDouble(getVar(ID).getValue().toString()) + step);
+//                deleteContext();
             }
         }
 //        return super.visitBloquePara(ctx);
@@ -354,15 +450,15 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     public T visitBloqueSi(pseintGrammarParser.BloqueSiContext ctx
     ) {
         if (ctx.expr() != null) {
-            Boolean condition = (Boolean) visitExpr(ctx.expr());
+            Boolean condition = evalBooleanExpr(visitExpr(ctx.expr()));
             if (condition) {
-                createContext();
+//                createContext();
                 visitComandos(ctx.comandos(0));
-                deleteContext();
-            } else {
-                createContext();
+//                deleteContext();
+            } else if (ctx.SINO() != null) {
+//                createContext();
                 visitComandos(ctx.comandos(1));
-                deleteContext();
+//                deleteContext();
             }
         }
 //        return super.visitBloqueSi(ctx);
@@ -382,10 +478,11 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     @Override
     public T visitProcedimiento(pseintGrammarParser.ProcedimientoContext ctx
     ) {
-        createContext();
-        visitComandos(ctx.comandos());
-        deleteContext();
-        return super.visitProcedimiento(ctx);
+//        createContext();
+//        visitComandos(ctx.comandos());
+//        deleteContext();
+//        return super.visitProcedimiento(ctx);
+        return null;
     }
 
     @Override
@@ -395,16 +492,29 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         return super.visitPseint(ctx);
     }
 
+    private boolean isProcDefined(String id) {
+        boolean defined = false;
+        for (Entry<String, Procedure> entry : procedures.entrySet())
+            defined |= entry.getValue().getName().equals(id);
+        return defined;
+    }
+
     private boolean isVarDefined(String id) {
         return contextVariables.peek().containsKey(id);
     }
 
-    private Object getVarValue(String id) {
+    private void createVar(String id, String type) {
+        contextVariables.peek().put(id, new Variable(id, type, false));
+    }
+
+    private Variable getVar(String id) {
         return contextVariables.peek().get(id);
     }
 
     private void setVarValue(String id, Object value) {
-        contextVariables.peek().put(id, value);
+        Variable var = contextVariables.peek().get(id);
+        var.setInitialized(true);
+        var.setValue(value);
     }
 
     private void createContext() {
@@ -414,13 +524,20 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         contextVariablesNames.push(varNames);
     }
 
-    private void createContextProcedure() {
+    private void createContextProcedure(List<String> paramNames, List<Object> paramValues) {
+        HashMap<String, Variable> params = new HashMap<>();
+        int numParams = paramNames.size();
+        for (int i = 0; i < numParams; i++) {
+            String name = paramNames.get(i);
+            Object value = paramValues.get(i);
+            params.put(paramNames.get(i), new Variable(name, guessTipoDato(value), true, value));
+        }
         contextVariables.push(new HashMap<>());
-        createContext();
+        contextVariables.push(params);
     }
 
     private void deleteContext() {
-        Map<String, Object> curContext = contextVariables.peek();
+        Map<String, Variable> curContext = contextVariables.peek();
         contextVariables.pop();
         curContext.forEach((key, value) -> {
             if (isVarDefined(key))
@@ -429,18 +546,23 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
 
     }
 
+    private void deleteContextProcedure() {
+        deleteContext();
+        deleteContext();
+    }
+
     private Object transformByType(String id, String value) {
-        Object var = getVarValue(id);
+        Object var = getVar(id).getValue();
         final String simpleName = var.getClass().getSimpleName();
         boolean errorTransformation;
         switch (simpleName) {
-            case "Integer":
+            case INTEGER:
                 return (Integer) Integer.parseInt(value);
-            case "Double":
+            case DOUBLE:
                 return (Double) Double.parseDouble(value);
-            case "String":
+            case STRING:
                 return value;
-            case "Boolean":
+            case BOOLEAN:
                 return (Boolean) Boolean.parseBoolean(value);
             default:
                 Util.semanticError(0, 0, value);
@@ -452,18 +574,33 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     public T visitTipoDato(pseintGrammarParser.TipoDatoContext ctx) {
         Object tipoDato = null;
         if (ctx.tipoDatoEntero() != null)
-            tipoDato = (Integer) 0;
+            tipoDato = INTEGER;
         else if (ctx.tipoDatoReal() != null)
-            tipoDato = (Double) 0.0;
+            tipoDato = DOUBLE;
         else if (ctx.tipoDatoCaracter() != null)
-            tipoDato = (Character) (char) 0;
+            tipoDato = CHARACTER;
         else if (ctx.tipoDatoTexto() != null)
-            tipoDato = (String) "";
+            tipoDato = STRING;
         else if (ctx.tipoDatoLogico() != null)
-            tipoDato = (Boolean) false;
+            tipoDato = BOOLEAN;
         else
-            Util.semanticError(0, 0, "Tipo de dato invalido");
+            Util.semanticError(ctx.tipoDatoEntero().getTokens(0).get(0), "Tipo de dato invalido");
         return (T) tipoDato;
+    }
+
+    private String guessTipoDato(Object value) {
+        if (value instanceof Integer)
+            return INTEGER;
+        if (value instanceof Double)
+            return DOUBLE;
+        if (value instanceof Character)
+            return CHARACTER;
+        if (value instanceof String)
+            return STRING;
+        if (value instanceof Boolean)
+            return BOOLEAN;
+        Util.semanticError(0, 0, "Tipo de dato invalido");
+        return null;
     }
 
     public Boolean

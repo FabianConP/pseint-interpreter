@@ -113,6 +113,12 @@ public interface pseintGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBloqueEsperar(pseintGrammarParser.BloqueEsperarContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link pseintGrammarParser#bloqueLlamarFuncion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBloqueLlamarFuncion(pseintGrammarParser.BloqueLlamarFuncionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link pseintGrammarParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -142,6 +148,12 @@ public interface pseintGrammarVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitCasoLista(pseintGrammarParser.CasoListaContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link pseintGrammarParser#llamarFuncion}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLlamarFuncion(pseintGrammarParser.LlamarFuncionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link pseintGrammarParser#varArreglo}.
 	 * @param ctx the parse tree
