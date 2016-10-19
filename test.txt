@@ -1,5 +1,65 @@
-Proceso mi_proceso
- Definir c Como Logico;
- Leer c;
- Escribir c;
-FinProceso
+subproceso f <- fibo(x)
+    Definir f como Entero;
+    Si x <= 1 Entonces
+        f <- 1;
+    sino
+        f <- fibo(x - 1) + fibo(x - 2);
+    finsi
+finsubproceso
+
+subproceso g <- gcd(a, b) 
+    Definir g como Entero;
+    si b = 0 entonces
+        g <- a;
+    sino
+        g <- gcd(b, a % b);
+    finsi
+finsubproceso
+
+funcion p <- power(base, exp, m) 
+    definir p como entero;
+    si exp = 0 entonces
+        p <- 1;
+    sino si exp = 1 entonces
+        p <- base;
+    sino si exp % 2 = 0 entonces
+        p <- power(base * base % m, exp/2, m);
+    sino
+        p <- base * power(base, exp - 1, m) % m;
+    finsi finsi finsi
+finfuncion
+
+Proceso main
+    /*Definir i como Entero;
+    Para i <- 0 Hasta 8 Hacer
+        Escribir fibo(i);
+    finpara
+    /*
+    Para i <- 0 Hasta 8 Hacer
+        Escribir gcd(i, 8);
+    finpara
+
+    Escribir power(2016, 2016, 11);*/
+    
+    Definir a, i, j, k, ans como Entero;
+    Dimension a[10, 10, 10];
+    
+    Para i <- 0 Hasta 9 Hacer
+        Para j <- 0 Hasta 9 Hacer
+            Para k <- 0 Hasta 9 Hacer
+                a[i, j, k] <- 2;
+            finpara
+        finpara
+    finpara
+    
+    ans <- 0;
+    Para i <- 0 Hasta 9 Hacer
+        Para j <- 0 Hasta 9 Hacer
+            Para k <- 0 Hasta 10 Hacer
+                ans <- ans + a[i, j, k];
+            finpara
+        finpara
+    finpara
+
+    Escribir ans;
+finproceso

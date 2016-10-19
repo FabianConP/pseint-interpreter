@@ -12,7 +12,7 @@ import model.generated.pseintGrammarParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
+public class MainVisitor<T> extends pseintGrammarBaseVisitor<T> {
 
     private Stack<Map<String, Variable>> contextVariables;
     private Stack<List<String>> contextVariablesNames;
@@ -28,7 +28,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
     private static final String STRING = "String";
     private static final String BOOLEAN = "Boolean";
 
-    public MyVisitor(HashMap<String, Procedure> procedures) {
+    public MainVisitor(HashMap<String, Procedure> procedures) {
         contextVariables = new Stack<>();
         contextVariablesNames = new Stack<>();
         contextVariables.push(new HashMap<>());
@@ -179,9 +179,24 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 tradArray = generateTradDimension(ctx.varArreglo(), dims);
             }
             String tradID = id + tradArray;
-            if (!isVarDefined(tradID))
-                ErrorHandling.semanticError(ctx.varArreglo(), 
-                    "variable no definida o dimensiones incorrectas");
+            boolean idDefined = false;
+            for(Entry<String, Variable> entry : contextVariables.peek().entrySet())
+                if(entry.getKey().startsWith(id + "$")){
+                    idDefined = true;
+                    break;
+                }
+            
+            if ( !idDefined )
+                ErrorHandling.semanticError(ctx.varArreglo(),
+                    ErrorHandling.variableNotDeclaredErrorMessage(id));
+            
+            if (!isVarDefined(tradID)){
+                String index  = tradArray.replaceAll("\\$", ", ");
+                index = index.replaceFirst(", ", "");
+                ErrorHandling.runtimeError(ctx.varArreglo(), 
+                    ErrorHandling.invalidArrayPositionErrorMessage(index));
+            }
+            
             if (!getVar(tradID).isInitialized())
                 ErrorHandling.semanticError(ctx.varArreglo().ID(), 
                     ErrorHandling.variableNotInitializedErrorMessage(id));

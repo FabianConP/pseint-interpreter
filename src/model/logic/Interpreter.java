@@ -19,7 +19,7 @@ public class Interpreter {
         pseintGrammarParser parser = new pseintGrammarParser(tokens);
         ParseTree tree = parser.pseint();
 
-        ProceduresVisitor<Object> procVisitor = new ProceduresVisitor<>();
+        ProcedureVisitor<Object> procVisitor = new ProcedureVisitor<>();
         try {
             procVisitor.visit(tree);
         } catch (Exception e) {
@@ -27,7 +27,7 @@ public class Interpreter {
             System.err.println("Function error");
         }
 
-        MyVisitor<Object> loader = new MyVisitor<>(procVisitor.getProcedures());
+        MainVisitor<Object> loader = new MainVisitor<>(procVisitor.getProcedures());
         try {
             loader.visit(tree);
         } catch (Exception e) {

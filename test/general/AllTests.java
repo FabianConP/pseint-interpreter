@@ -16,8 +16,8 @@ import java.util.logging.Logger;
 import model.generated.pseintGrammarLexer;
 import model.generated.pseintGrammarParser;
 import model.logic.Interpreter;
-import model.logic.MyVisitor;
-import model.logic.ProceduresVisitor;
+import model.logic.MainVisitor;
+import model.logic.ProcedureVisitor;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -88,6 +88,30 @@ public class AllTests {
         String baseIn = "test-files/subprocesos/subprocesos_in", 
                baseOut = "test-files/subprocesos/subprocesos_out", 
                baseCorrectOut = "test-files/subprocesos/subprocesos_correct", 
+               in = null, out, correct;
+        
+        numberOfTests = 1;
+        for ( int i = 1; i <= numberOfTests; ++i ) {
+            try {
+                in = baseIn + i + IN_EXTENSION;
+                out = baseOut + i + OUT_EXTENSION;
+                correct = baseOut + i + CORRECT_EXTENSION;
+                
+                util.Interpreter.run(in, out);
+                
+                assertTrue(util.FileComparator.equals(correct, out));
+            } catch (Exception ex) {
+                System.err.println("Runtime Error while reading " + in);
+            }
+        }
+    }
+    
+    
+    @Test
+    public void recursion () {
+        String baseIn = "test-files/recursion/recursion_in", 
+               baseOut = "test-files/recursion/recursion_out", 
+               baseCorrectOut = "test-files/recursion/recursion_correct", 
                in = null, out, correct;
         
         numberOfTests = 1;

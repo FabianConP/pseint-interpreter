@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import model.generated.pseintGrammarLexer;
 import model.generated.pseintGrammarParser;
-import model.logic.MyVisitor;
-import model.logic.ProceduresVisitor;
+import model.logic.MainVisitor;
+import model.logic.ProcedureVisitor;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -27,7 +27,7 @@ public class Interpreter {
         pseintGrammarParser parser = new pseintGrammarParser(tokens);
         ParseTree tree = parser.pseint();
 
-        ProceduresVisitor<Object> procVisitor = new ProceduresVisitor<>();
+        ProcedureVisitor<Object> procVisitor = new ProcedureVisitor<>();
         try {
             procVisitor.visit(tree);
         } catch (Exception e) {
@@ -35,7 +35,7 @@ public class Interpreter {
             System.err.println("Functions error");
         }
 
-        MyVisitor<Object> loader = new MyVisitor<>(procVisitor.getProcedures());
+        MainVisitor<Object> loader = new MainVisitor<>(procVisitor.getProcedures());
         try {
             loader.visit(tree);
         } catch (Exception e) {

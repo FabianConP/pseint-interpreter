@@ -6,11 +6,11 @@ import java.util.List;
 import model.generated.pseintGrammarBaseVisitor;
 import model.generated.pseintGrammarParser;
 
-public class ProceduresVisitor<T> extends pseintGrammarBaseVisitor<T> {
+public class ProcedureVisitor<T> extends pseintGrammarBaseVisitor<T> {
 
     private HashMap<String, Procedure> procedures;
 
-    public ProceduresVisitor() {
+    public ProcedureVisitor() {
         procedures = new HashMap<>();
     }
 
