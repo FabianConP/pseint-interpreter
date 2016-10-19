@@ -90,7 +90,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             final String op = ctx.MULOP().getText().toLowerCase();
             Object a = visitExpr(ctx.expr(0));
             Object b = visitExpr(ctx.expr(1));
-            Object result = mul(a, b, op);
+            Object result = mul(ctx.expr(1), a, b, op);
             if (result == null) {
                 if ( a instanceof Integer || a instanceof Double )
                     ErrorHandling.semanticError(ctx.expr(1),
@@ -160,7 +160,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             Object b = visitExpr(ctx.expr(1));
             Object result = compOp(a, b, op);
             if (result == null)
-                ErrorHandling.semanticError(ctx.COMPOP(), "error en comparacion");
+                ErrorHandling.semanticError(ctx.COMPOP(),
+                    ErrorHandling.expectedDifferentTypeErrorMessage(a, b));
             return (T) result;
         } else if (ctx.llamarFuncion() != null) {
             String name = ctx.llamarFuncion().ID().getText();
@@ -179,7 +180,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             }
             String tradID = id + tradArray;
             if (!isVarDefined(tradID))
-                ErrorHandling.semanticError(0, 0, "variable no definida o dimensiones incorrectas");
+                ErrorHandling.semanticError(ctx.varArreglo(), 
+                    "variable no definida o dimensiones incorrectas");
             if (!getVar(tradID).isInitialized())
                 ErrorHandling.semanticError(ctx.varArreglo().ID(), 
                     ErrorHandling.variableNotInitializedErrorMessage(id));
@@ -189,8 +191,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         } else if (ctx.ID() != null) {
             String ID = ctx.ID().getText();
             if (!isVarDefined(ID) && !isProcDefined(ID))
-                ErrorHandling.semanticError(ctx.ID(), "la variable con nombre \"" + 
-                        ID + "\" no ha sido declarada");
+                ErrorHandling.semanticError(ctx.ID(), 
+                    ErrorHandling.variableNotDeclaredErrorMessage(ID));
             if (isVarDefined(ID)) {
                 if (!getVar(ID).isInitialized())
                     ErrorHandling.semanticError(ctx.ID(), 
@@ -204,10 +206,12 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 if (procedure.getReturnVar() != null) {
                     Variable returnVar = procedure.getReturnVar();
                     if (!isVarDefined(returnVar.getName()))
-                        ErrorHandling.semanticError(0, 0, "la variable de retorno no fue creada");
+                        ErrorHandling.semanticError(procedure.getContext(), 
+                            "la variable de retorno no fue creada");
                     Variable var = getVar(returnVar.getName());
                     if (!var.isInitialized())
-                        ErrorHandling.semanticError(0, 0, "variable de retorno no inicializada");
+                        ErrorHandling.semanticError(procedure.getContext(), 
+                            "variable de retorno no fue inicializada");
                     deleteContextProcedure();
                     return (T) var.getValue();
                 } else
@@ -231,7 +235,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 ErrorHandling.semanticError(ctx.ID(), 
                     ErrorHandling.incorrectNumberOfParametersErrorMessage(name));
         } else
-            ErrorHandling.semanticError(ctx.ID(), "el metodo " + name + " no existe");
+            ErrorHandling.semanticError(ctx.ID(),
+                ErrorHandling.functionNotDeclaredErrorMessage(id));
         List<Object> paramValues = new LinkedList<>();
         if (ctx.exprLista() != null)
             paramValues = (List<Object>) visitExprLista(ctx.exprLista());
@@ -242,10 +247,12 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         if (procedure.getReturnVar() != null) {
             Variable returnVar = procedure.getReturnVar();
             if (!isVarDefined(returnVar.getName()))
-                ErrorHandling.semanticError(0, 0, "la variable de retorno no fue creada");
+                ErrorHandling.semanticError(procedure.getContext(), 
+                            "la variable de retorno no fue creada");
             Variable var = getVar(returnVar.getName());
             if (!var.isInitialized())
-                ErrorHandling.semanticError(0, 0, "variable de retorno no inicializada");
+                ErrorHandling.semanticError(procedure.getContext(), 
+                            "variable de retorno no fue inicializada");
             deleteContextProcedure();
             return (T) var.getValue();
         } else
@@ -289,9 +296,20 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             ctx.idLista().ID().stream().forEach((id) -> {
                 String ID = id.getText();
                 if (!isVarDefined(ID))
-                    ErrorHandling.semanticError(0, 0, "");
+                    ErrorHandling.semanticError(id,
+                        ErrorHandling.variableNotDeclaredErrorMessage(ID));
                 String value = in.next();
-                setVarValue(ID, transformByType(ID, value));
+                
+                String type1 = getVar(ID).getType();
+                String type2 = guessTipoDato(value);
+                
+                try {
+                    setVarValue(ID, transformByType(ID, value));
+                } catch ( Exception e ) {
+                    ErrorHandling.runtimeError(id,
+                        ErrorHandling.expectedDifferentTypeErrorMessage(
+                            ErrorHandling.getTypeString(type1), value));
+                }
             });
         }
         //return super.visitBloqueLeer(ctx);
@@ -339,13 +357,15 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                     ErrorHandling.semanticError(varArreglo, 
                         ErrorHandling.variableNotDeclaredErrorMessage(ID));
                 else if (getVar(ID).isInitialized())
-                    ErrorHandling.semanticError(varArreglo, "la variable " + ID + " ya se declaro como no arreglo");
+                    ErrorHandling.semanticError(varArreglo, 
+                            "la variable \"" + ID + "\" ya se inicializo como no arreglo");
                 List<Object> dims = (List<Object>) visitExprLista(varArreglo.exprLista());
                 List<String> tradAllID = tradAllDimension(varArreglo, ID, dims);
                 String type = getVar(ID).getType();
                 for (String tradID : tradAllID) {
                     if (isVarDefined(tradID))
-                        ErrorHandling.semanticError(varArreglo, "la variable " + tradID + " ya ha sido declarada");
+                        ErrorHandling.semanticError(varArreglo,
+                            ErrorHandling.variableAlreadyDeclaredErrorMessage(ID));
                     createVar(tradID, type);
                 }
                 deleteVar(ID);
@@ -638,18 +658,22 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         deleteContext();
     }
 
-    private Object transformByType(String id, String value) {
+    private Object transformByType(String id, String value) throws Exception {
         Object var = getVar(id).getValue();
         final String simpleName = var.getClass().getSimpleName();
-        boolean errorTransformation;
         switch (simpleName) {
             case INTEGER:
-                return (Integer) Integer.parseInt(value);
+                double temp = (Double) Double.parseDouble(value);
+                return (Integer) (int) temp;
             case DOUBLE:
                 return (Double) Double.parseDouble(value);
             case STRING:
                 return value;
             case BOOLEAN:
+                if ( value.equals("verdadero") ) value = "true";
+                else if ( value.equals("falso") ) value = "false";
+                else 
+                    throw new Exception("Bad value for boolean variable");
                 return (Boolean) Boolean.parseBoolean(value);
             default:
                 ErrorHandling.semanticError(0, 0, value);
@@ -671,7 +695,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         else if (ctx.tipoDatoLogico() != null)
             tipoDato = BOOLEAN;
         else
-            ErrorHandling.semanticError(ctx.tipoDatoEntero().getTokens(0).get(0), "Tipo de dato invalido");
+            ErrorHandling.semanticError(ctx.tipoDatoEntero().getTokens(0).get(0), 
+                    "tipo de dato invalido");
         return (T) tipoDato;
     }
 
@@ -686,7 +711,8 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             return STRING;
         if (value instanceof Boolean)
             return BOOLEAN;
-        ErrorHandling.semanticError(0, 0, "Tipo de dato invalido");
+        ErrorHandling.semanticError(0, 0, 
+            "tipo de dato invalido");
         return null;
     }
 
@@ -698,7 +724,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
         return (Boolean) expr;
     }
 
-    private Object mul(Object a, Object b, final String op) {
+    private Object mul(ParserRuleContext rule, Object a, Object b, final String op) {
         boolean aIsInteger = a instanceof Integer;
         boolean aIsDouble = a instanceof Double;
 
@@ -712,7 +738,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
             switch (op) {
                 case "/":
                     if (numb == 0)
-                        ErrorHandling.semanticError(0, 0, "division entre 0");
+                        ErrorHandling.runtimeError(rule, "division entre 0");
                     else
                         res = (numa / numb);
                     break;
@@ -722,7 +748,7 @@ public class MyVisitor<T> extends pseintGrammarBaseVisitor<T> {
                 case "%":
                 case "mod":
                     if (numb == 0)
-                        ErrorHandling.semanticError(0, 0, "division entre 0");
+                        ErrorHandling.runtimeError(rule, "division entre 0");
                     else
                         res = (numa % numb);
                     break;

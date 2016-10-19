@@ -16,31 +16,31 @@ public class ErrorHandling {
     }
     
     public static void semanticError(int line, int col, String message){
-        System.out.printf("<%d:%d> Error semantico: %s.\n", line, col, message);
+        System.err.printf("<%d:%d> Error semantico: %s.\n", line, col, message);
         System.exit(0);
     }
     
     
     public static void semanticError(TerminalNode node, String message){
-        System.out.printf("<%d:%d> Error semantico: %s.\n", 
+        System.err.printf("<%d:%d> Error semantico: %s.\n", 
                 node.getSymbol().getLine(), 1 + node.getSymbol().getCharPositionInLine(), message);
         System.exit(0);
     }
     
     public static void semanticError(ParserRuleContext rule, String message){
-        System.out.printf("<%d:%d> Error semantico: %s.\n", 
+        System.err.printf("<%d:%d> Error semantico: %s.\n", 
                 rule.getStart().getLine(), 1 + rule.getStart().getCharPositionInLine(), message);
         System.exit(0);
     }
     
     public static void runtimeError(TerminalNode node, String message){
-        System.out.printf("<%d:%d> Error en tiempo de ejecucion: %s.\n", 
+        System.err.printf("<%d:%d> Error en tiempo de ejecucion: %s.\n", 
                 node.getSymbol().getLine(), 1 + node.getSymbol().getCharPositionInLine(), message);
         System.exit(0);
     }
     
     public static void runtimeError(ParserRuleContext rule, String message){
-        System.out.printf("<%d:%d> Error en tiempo de ejecucion: %s.\n", 
+        System.err.printf("<%d:%d> Error en tiempo de ejecucion: %s.\n", 
                 rule.getStart().getLine(), 1 + rule.getStart().getCharPositionInLine(), message);
         System.exit(0);
     }
@@ -57,6 +57,18 @@ public class ErrorHandling {
         return "tipo no encontrado";
     }
     
+    public static String getTypeString ( String s ) {
+        if ( s.equals("Integer") )
+            return "entero";
+        if ( s.equals("Double") )
+            return "real";
+        if ( s.equals("Boolean") )
+            return "logico";
+        if ( s.equals("String") )
+            return "cadena";
+        return "tipo no encontrado";
+    }
+    
     public static String expectedDifferentTypeErrorMessage (Object expected, Object found) {
         return "tipos de datos incompatibles. Se esperaba: "
                + ErrorHandling.getTypeString(expected)
@@ -67,6 +79,10 @@ public class ErrorHandling {
         return "tipos de datos incompatibles. Se esperaba: "
                + expected
                + ";​se encontro: " + ErrorHandling.getTypeString(found);
+    }
+    
+    public static String functionNotDeclaredErrorMessage (String id) {
+        return "la funcion con nombre \"" + id + "\" no ha sido declarada";
     }
     
     public static String variableNotDeclaredErrorMessage (String id) {

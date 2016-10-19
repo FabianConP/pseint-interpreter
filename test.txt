@@ -1,6 +1,5 @@
 Proceso mi_proceso
- Definir c Como Real;
- c <- 12;
- b[0, 2] <- (3*212 - c*323/21 ) / (21 - 2);
- Escribir b;
+ Definir c Como Logico;
+ Leer c;
+ Escribir c;
 FinProceso

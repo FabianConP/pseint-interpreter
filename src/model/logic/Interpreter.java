@@ -24,7 +24,7 @@ public class Interpreter {
             procVisitor.visit(tree);
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Algo se jodio mirando las funciones");
+            System.err.println("Function error");
         }
 
         MyVisitor<Object> loader = new MyVisitor<>(procVisitor.getProcedures());
@@ -32,7 +32,7 @@ public class Interpreter {
             loader.visit(tree);
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Algo se jodio");
+            System.err.println("Main visitor error");
         }
 
     }
