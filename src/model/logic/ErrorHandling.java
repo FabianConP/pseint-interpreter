@@ -16,31 +16,31 @@ public class ErrorHandling {
     }
     
     public static void semanticError(int line, int col, String message){
-        System.err.printf("<%d:%d> Error semantico: %s.\n", line, col, message);
+        System.out.printf("<%d:%d> Error semantico: %s.\n", line, col, message);
         System.exit(0);
     }
     
     
     public static void semanticError(TerminalNode node, String message){
-        System.err.printf("<%d:%d> Error semantico: %s.\n", 
+        System.out.printf("<%d:%d> Error semantico: %s.\n", 
                 node.getSymbol().getLine(), 1 + node.getSymbol().getCharPositionInLine(), message);
         System.exit(0);
     }
     
     public static void semanticError(ParserRuleContext rule, String message){
-        System.err.printf("<%d:%d> Error semantico: %s.\n", 
+        System.out.printf("<%d:%d> Error semantico: %s.\n", 
                 rule.getStart().getLine(), 1 + rule.getStart().getCharPositionInLine(), message);
         System.exit(0);
     }
     
     public static void runtimeError(TerminalNode node, String message){
-        System.err.printf("<%d:%d> Error en tiempo de ejecucion: %s.\n", 
+        System.out.printf("<%d:%d> Error en tiempo de ejecucion: %s.\n", 
                 node.getSymbol().getLine(), 1 + node.getSymbol().getCharPositionInLine(), message);
         System.exit(0);
     }
     
     public static void runtimeError(ParserRuleContext rule, String message){
-        System.err.printf("<%d:%d> Error en tiempo de ejecucion: %s.\n", 
+        System.out.printf("<%d:%d> Error en tiempo de ejecucion: %s.\n", 
                 rule.getStart().getLine(), 1 + rule.getStart().getCharPositionInLine(), message);
         System.exit(0);
     }
