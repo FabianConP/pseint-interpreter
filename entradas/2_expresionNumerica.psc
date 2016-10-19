@@ -9,5 +9,4 @@ Proceso sin_titulo
     Escribir 8/6/9*5+7/6+10*7-5*2*9;
     Escribir 5/8/6-10-4/7-8*4%3-10/3;
     Escribir 6%10-1%6-6/9+9%5*10-8/2;
-    Escribir 100-10;
 FinProceso

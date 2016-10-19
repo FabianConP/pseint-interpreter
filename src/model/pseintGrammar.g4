@@ -46,9 +46,10 @@ bloqueEsperar           : ESPERAR TECLA PYC
 bloqueLlamarFuncion     : llamarFuncion PYC;
 
 expr                    : valor
+                        | expr POTOP expr
                         | expr MULOP expr
-                        | expr SUMOP expr
                         | expr RESOP expr
+                        | expr SUMOP expr
                         | RESOP expr                   
                         | NEGOP expr
                         | expr COMPOP expr                                          
@@ -58,7 +59,22 @@ expr                    : valor
                         | PARIZQ expr PARDER
                         | ID
                         ;
-
+/*
+expr                    : valor
+                        | llamarFuncion
+                        | varArreglo
+                        | expr BINOP expr
+                        | expr COMPOP expr                                          
+                        | NEGOP expr
+                        | expr RESOP expr
+                        | expr SUMOP expr
+                        | expr MULOP expr
+                        | expr POTOP expr
+                        | RESOP expr                   
+                        | PARIZQ expr PARDER
+                        | ID
+                        ;
+*/
 valor                   : INT
                         | DOUBLE
                         | STRING
@@ -96,7 +112,8 @@ ASIGOP                  : '<-';
 
 COMPOP                  : ('=' | '<>' | '<' | '<=' | '>' | '>=');
 BINOP                   : (O | '|' | Y | '&');
-MULOP                   : ('/' | '*' | '%' | MOD | '^');
+MULOP                   : ('/' | '*' | '%' | MOD);
+POTOP                   : ('^');
 
 SUMOP                   : ('+');
 RESOP                   : ('-');

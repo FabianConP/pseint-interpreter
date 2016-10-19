@@ -86,6 +86,21 @@ public class MainVisitor<T> extends pseintGrammarBaseVisitor<T> {
     public T visitExpr(pseintGrammarParser.ExprContext ctx) {
         if (ctx.valor() != null) {
             return visitValor(ctx.valor());
+        } else if (ctx.POTOP() != null) {
+            final String op = ctx.POTOP().getText().toLowerCase();
+            Object a = visitExpr(ctx.expr(0));
+            Object b = visitExpr(ctx.expr(1));
+            Object result = pot(ctx.expr(1), a, b, op);
+            if (result == null) {
+                if ( a instanceof Integer || a instanceof Double )
+                    ErrorHandling.semanticError(ctx.expr(1),
+                        ErrorHandling.expectedDifferentTypeErrorMessage("entero o real", b));
+                else
+                    ErrorHandling.semanticError(ctx.expr(0),
+                        ErrorHandling.expectedDifferentTypeErrorMessage("entero o real", a));
+            }
+            return (T) result;
+            
         } else if (ctx.MULOP() != null) {
             final String op = ctx.MULOP().getText().toLowerCase();
             Object a = visitExpr(ctx.expr(0));
@@ -164,7 +179,7 @@ public class MainVisitor<T> extends pseintGrammarBaseVisitor<T> {
                     ErrorHandling.expectedDifferentTypeErrorMessage(a, b));
             return (T) result;
         } else if (ctx.llamarFuncion() != null) {
-            String name = ctx.llamarFuncion().ID().getText();
+            String name = ctx.llamarFuncion().ID().getText().toLowerCase();
             int numParams = (ctx.llamarFuncion().exprLista() == null) ? 0 : ctx.llamarFuncion().exprLista().expr().size();
             Procedure procedure = procedures.get(Procedure.buildId(name, numParams));
             if (procedure.getReturnVar() == null)
@@ -779,6 +794,33 @@ public class MainVisitor<T> extends pseintGrammarBaseVisitor<T> {
         }
         return null;
     }
+    
+    
+    private Object pot(ParserRuleContext rule, Object a, Object b, final String op) {
+        boolean aIsInteger = a instanceof Integer;
+        boolean aIsDouble = a instanceof Double;
+
+        boolean bIsInteger = b instanceof Integer;
+        boolean bIsDouble = b instanceof Double;
+
+        double res = 0;
+
+        if ((aIsInteger || aIsDouble) && (bIsInteger || bIsDouble)) {
+            double numa = (Double) Double.parseDouble(a.toString()), numb = (Double) Double.parseDouble(b.toString());
+            switch (op) {
+                case "^":
+                    res = Math.pow(numa, numb);
+                    break;
+                default:
+                    ErrorHandling.semanticError(0, 0, "operador desconocido");
+            }
+            if (isInteger(res))
+                return (Integer) (int) Math.round(res);
+            return (Double) res;
+        }
+        return null;
+    }
+    
 
     private Object sum(Object a, Object b, final String op) {
         boolean aIsInteger = a instanceof Integer;
