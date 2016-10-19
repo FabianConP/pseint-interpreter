@@ -20,9 +20,9 @@ public class ProceduresVisitor<T> extends pseintGrammarBaseVisitor<T> {
         if (ctx.ID() != null) {
             String nameProc = ctx.ID().getText().toLowerCase();
             String id = Procedure.buildId(nameProc, 0);
-            //? if (procedures.containsKey(id))
-            if (procedures.containsKey(nameProc))
-                Util.semanticError(ctx.ID(), "el simbolo con nombre \"" + nameProc + "\" ya ha sido declarado");
+            if (procedures.containsKey(id))
+            //? if (procedures.containsKey(nameProc))
+                ErrorHandling.semanticError(ctx.ID(), "el simbolo con nombre \"" + nameProc + "\" ya ha sido declarado");
             Procedure procedure = new Procedure(nameProc, new LinkedList<String>(), null, null);
             procedures.put(id, procedure);
         }
@@ -38,9 +38,9 @@ public class ProceduresVisitor<T> extends pseintGrammarBaseVisitor<T> {
             String nameProc = ctx.ID(procIdPos).getText().toLowerCase();
             int numParams = ctx.idLista() == null ? 0 : ctx.idLista().ID().size();
             String id = Procedure.buildId(nameProc, numParams);
-            //? if (procedures.containsKey(id))
-            if (procedures.containsKey(nameProc))
-                Util.semanticError(ctx.ID(procIdPos), "el simbolo con nombre \"" + nameProc + "\" ya ha sido declarado");
+            if (procedures.containsKey(id))
+            //? if (procedures.containsKey(nameProc))
+                ErrorHandling.semanticError(ctx.ID(procIdPos), "el simbolo con nombre \"" + nameProc + "\" ya ha sido declarado");
             Variable returnVar = null;
             if (procIdPos > 0) {
                 String idReturnVarName = ctx.ID(0).getText();
@@ -50,8 +50,8 @@ public class ProceduresVisitor<T> extends pseintGrammarBaseVisitor<T> {
             if(ctx.idLista() != null && ctx.idLista().ID() != null)
                 ctx.idLista().ID().stream().forEach(idParam -> params.add(idParam.getText()));
             Procedure procedure = new Procedure(nameProc, params, returnVar, ctx);
-            //? procedures.put(id, procedure);
-            procedures.put(nameProc, procedure);
+            procedures.put(id, procedure);
+            //? procedures.put(nameProc, procedure);
         }
 //        return super.visitProcedimiento(ctx);
         return null;
